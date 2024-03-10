@@ -14,4 +14,4 @@ USERNAME="yap-student"
 SSH_KEY="~/.ssh/yap_id_ed25519"
 
 # Open the remote host's SSH session
-ssh -i $SSH_KEY "yap_student@{$HOSTNAME}"
+ssh -i $SSH_KEY "${USERNAME}@${HOSTNAME}"
