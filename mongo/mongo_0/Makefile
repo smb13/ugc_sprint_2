@@ -28,43 +28,43 @@ mongo_build: # Сборка
 # Configuration
 
 mongo_up_config: # Запуск серверов конфигурации
-	docker compose $(DOCKER_COMPOSE) up -d mongocfg1 mongocfg2 mongocfg3
+	docker compose $(DOCKER_COMPOSE) up -d mongocfg1
 
 mongo_config: # Конфигурация серверов конфигурации
 	docker compose $(DOCKER_COMPOSE) exec -it mongocfg1 bash -c 'echo "rs.initiate({_id: \"mongors1conf\",'\
-	' configsvr: true, members: [{_id: 0, host: \"mongocfg1\"}, {_id: 1, host: \"mongocfg2\"},'\
-	' {_id: 2, host: \"mongocfg3\"}]})" | mongosh'
+	' configsvr: true, members: [{_id: 0, host: \"$(MONGO_CFG_1)\"}, {_id: 1, host: \"$(MONGO_CFG_2)\"},'\
+	' {_id: 2, host: \"$(MONGO_CFG_3)\"}]})" | mongosh'
 
 # Shards
 
 mongo_up_shards: # Запуск серверов шардов
-	docker compose $(DOCKER_COMPOSE) up -d mongors1n1 mongors1n2 mongors1n3 mongors2n1 mongors2n2 mongors2n3
+	docker compose $(DOCKER_COMPOSE) up -d mongors1n1 mongors2n2
 
 
 mongo_config_shards: mongo_config_shards_1 mongo_config_shards_2 # Конфигурация шардов
 
 mongo_config_shards_1: # Конфигурация первого шарда
 	docker exec -it mongors1n1 bash -c 'echo "rs.initiate({_id: \"mongors1\",'\
-	' members: [{_id: 0, host: \"mongors1n1\"}, {_id: 1, host: \"mongors1n2\"},'\
-	' {_id: 2, host: \"mongors1n3\"}]})" | mongosh'
+	' members: [{_id: 0, host: \"${MONGO_SHARD_1N1}\"}, {_id: 1, host: \"${MONGO_SHARD_1N2}\"},'\
+	' {_id: 2, host: \"${MONGO_SHARD_1N3}\"}]})" | mongosh'
 
 mongo_config_shards_2: # Конфигурация второго шарда
 	docker exec -it mongors2n1 bash -c 'echo "rs.initiate({_id: \"mongors2\",'\
-	' members: [{_id: 0, host: \"mongors2n1\"}, {_id: 1, host: \"mongors2n2\"},'\
-	' {_id: 2, host: \"mongors2n3\"}]})" | mongosh'
+	' members: [{_id: 0, host: \"${MONGO_SHARD_2N1}\"}, {_id: 1, host: \"${MONGO_SHARD_2N3}\"},'\
+	' {_id: 2, host: \"${MONGO_SHARD_2N3}\"}]})" | mongosh'
 
 # Routers
 
 mongo_up_mongos: # Запуск роутеров
-	docker compose $(DOCKER_COMPOSE) up -d mongos1 mongos2
+	docker compose $(DOCKER_COMPOSE) up -d mongos1
 
 mongo_config_routers_shards: mongo_config_routers_shards_1 mongo_config_routers_shards_2 # Конфигурация роутеров
 
 mongo_config_routers_shards_1: # Конфигурация роутеров для первого шарда
-	docker exec -it mongos1 bash -c 'echo "sh.addShard(\"mongors1/mongors1n1\")" | mongosh'
+	docker exec -it mongos1 bash -c 'echo "sh.addShard(\"mongors1/${MONGO_SHARD_1N1}\")" | mongosh'
 
 mongo_config_routers_shards_2: # Конфигурация роутеров для второго шарда
-	docker exec -it mongos1 bash -c 'echo "sh.addShard(\"mongors2/mongors2n1\")" | mongosh'
+	docker exec -it mongos1 bash -c 'echo "sh.addShard(\"mongors2/${MONGO_SHARD_2N1}\")" | mongosh'
 
 # Logs
 
