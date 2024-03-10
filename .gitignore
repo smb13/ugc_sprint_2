@@ -132,8 +132,6 @@ venv.bak/
 
 # Environment variables
 .env
-.env.*
-.env_*
 
 # Rope project settings
 .ropeproject
