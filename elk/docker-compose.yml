@@ -26,7 +26,7 @@ services:
     volumes:
       - ./deploy/esdata:/usr/share/elasticsearch/data
     healthcheck:
-      test: [ CMD-SHELL, curl -s http://127.0.0.1:9200/_cluster/health]
+      test: [ CMD-SHELL, curl -s http://elasticsearch:9200/_cluster/health]
       start_period: 15s
       interval: 5s
       timeout: 10s
