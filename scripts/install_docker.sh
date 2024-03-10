@@ -18,7 +18,7 @@ echo \
 sudo apt-get update
 
 # Install Docker Engine, containerd, and Docker Compose
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 # Add the current user to the Docker group
 sudo usermod -aG docker $USER
@@ -36,6 +36,6 @@ content='{
 sudo echo "$content" | sudo tee -a /etc/docker/daemon.json
 
 # Verify that Docker Engine, containerd, and Docker Compose are installed correctly
-docker version
+docker -v
 docker compose version
 docker ps
