@@ -8,7 +8,7 @@ DOCKER_COMPOSE_DEV = --env-file ./.env -f ./docker-compose-dev.yml
 
 # Default, Help
 
-default: up_analytics
+default: analytics_up
 
 help: # Вывод информации make командах
 	@grep -E '^[a-zA-Z0-9 _-]+:.*#' Makefile | while read -r l; \
