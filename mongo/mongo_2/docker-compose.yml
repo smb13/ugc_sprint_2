@@ -18,7 +18,7 @@ services:
     image: mongo
     command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
     ports:
-      - 27037:27017
+      - 27017:27017
     expose:
       - "27017"
     volumes:
@@ -30,7 +30,7 @@ services:
     image: mongo
     command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
     ports:
-      - 27047:27017
+      - 27057:27017
     expose:
       - "27017"
     volumes:
