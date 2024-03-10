@@ -42,7 +42,7 @@ services:
     image: mongo
     depends_on:
       - mongocfg1
-    command: mongos --configdb mongors1conf/$MONGO_CFG_1:27017,$MONGO_CFG_2:27017,$MONGO_CFG_3:27017 --port 27017 --bind_ip_all
+    command: mongos --configdb mongors1conf/$MONGO_CFG_1,$MONGO_CFG_2,$MONGO_CFG_3 --port 27017 --bind_ip_all
     ports:
       - 27019:27017
     expose:
