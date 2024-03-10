@@ -50,7 +50,7 @@ mongo_config_shards_1: # Конфигурация первого шарда
 
 mongo_config_shards_2: # Конфигурация второго шарда
 	docker exec -it mongors2n2 bash -c 'echo "rs.initiate({_id: \"mongors2\",'\
-	' members: [{_id: 0, host: \"${MONGO_SHARD_2N1}\"}, {_id: 1, host: \"${MONGO_SHARD_2N3}\"},'\
+	' members: [{_id: 0, host: \"${MONGO_SHARD_2N1}\"}, {_id: 1, host: \"${MONGO_SHARD_2N2}\"},'\
 	' {_id: 2, host: \"${MONGO_SHARD_2N3}\"}]})" | mongosh'
 
 # Routers
