@@ -1,5 +1,5 @@
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -50,10 +50,10 @@ class KafkaSettings(BaseSettings):
 
 @dataclass
 class Settings:
-    logger: LogSettings = LogSettings()
-    database: ClickhouseSettings = ClickhouseSettings()
-    project: ProjectSettings = ProjectSettings()
-    kafka: KafkaSettings = KafkaSettings()
+    logger: LogSettings = field(default_factory=LogSettings)
+    database: ClickhouseSettings = field(default_factory=ClickhouseSettings)
+    project: ProjectSettings = field(default_factory=ProjectSettings)
+    kafka: KafkaSettings = field(default_factory=KafkaSettings)
 
 
 settings = Settings()

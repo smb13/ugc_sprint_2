@@ -26,16 +26,19 @@ class ClickhouseAccessor(BaseAccessor):
             self.cursor = self.connection.cursor(cursor_factory=DictCursor)
             return self
         except Exception as exc:
-            self.connection.rollback()
-            self.__close()
+            if self.connection:
+                self.connection.rollback()
+                self.__close()
             raise exc
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.__close()
 
     def __close(self):
-        self.cursor.close()
-        self.connection.close()
+        if self.cursor:
+            self.cursor.close()
+        if self.connection:
+            self.connection.close()
 
     @property
     def conn(self):

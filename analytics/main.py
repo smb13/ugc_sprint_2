@@ -17,7 +17,7 @@ from db import kafka
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI) -> None:
+async def lifespan(_: FastAPI):
     # Создаем подключение к базам при старте сервера.
     kafka.producer = AIOKafkaProducer(bootstrap_servers=kafka_settings.connection_string)
 
@@ -31,7 +31,7 @@ async def lifespan(_: FastAPI) -> None:
 
 
 @AuthJWT.load_config
-def get_config() -> None:
+def get_config() -> object:
     return project_settings
 
 
