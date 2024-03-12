@@ -10,26 +10,26 @@ logging_config.dictConfig(LOGGING)
 
 
 class ProjectSettings(BaseSettings):
-    name: str = Field("Analytics Service")
+    name: str = Field(default="Analytics Service")
     authjwt_secret_key: str
-    authjwt_algorithm: str = "HS256"
+    authjwt_algorithm: str = Field(default="HS256")
 
     model_config = SettingsConfigDict(env_prefix="project_", env_file=".env", extra="ignore")
 
 
 # Класс настройки Kafka
 class KafkaSettings(BaseSettings):
-    connection_string: str = Field("localhost:9094")
+    connection_string: str = Field(default="localhost:9094")
 
     model_config = SettingsConfigDict(env_prefix="kafka_", env_file=".env", extra="ignore")
 
 
 class GunicornSettings(BaseSettings):
-    host: str = Field("0.0.0.0")
-    port: int = Field(8000)
-    workers: int = Field(2)
-    loglevel: str = Field("debug")
-    model_config = SettingsConfigDict(env_prefix="gunicorn_", env_file=".env")
+    host: str = Field(default="0.0.0.0")
+    port: int = Field(default=8000)
+    workers: int = Field(default=2)
+    loglevel: str = Field(default="debug")
+    model_config = SettingsConfigDict(env_prefix="gunicorn_", env_file=".env", extra="ignore")
 
 
 gunicorn_settings = GunicornSettings()

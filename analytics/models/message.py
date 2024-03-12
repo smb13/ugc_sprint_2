@@ -5,13 +5,14 @@ from pydantic import BaseModel
 
 
 class Message(BaseModel):
-    """Сообщение для Kafka"""
-
-    """Топик"""
+    """
+    Сообщение для Kafka
+    """
+    # Топик
     topic: Annotated[str, IsNotNan, MinLen(1)]
-    """Временная метка"""
+    # Временная метка
     timestamp_ms: int
-    """Ключ сообщения"""
+    # Ключ сообщения
     key: bytes
-    """Значение сообщения"""
+    # Значение сообщения
     value: bytes | None
