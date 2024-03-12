@@ -8,6 +8,6 @@ logger.setLevel(settings.logger.log_level)
 
 # Настойки логов для вывода в консоль
 terminal = logging.StreamHandler()
-format_terminal = logging.Formatter(settings.logger.log_format, datefmt="[%Y-%m-%d %H:%M:%S.%f %z]")
+format_terminal = logging.Formatter(settings.logger.log_format, datefmt="[%Y-%m-%d %H:%M:%S %z]")
 terminal.setFormatter(format_terminal)
 logger.addHandler(terminal)
