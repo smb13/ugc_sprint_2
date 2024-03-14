@@ -6,3 +6,5 @@ backoff==2.2.1
 
 pydantic==2.3.0
 pydantic-settings==2.0.3
+
+sentry-sdk==1.42.0
