@@ -5,7 +5,7 @@ version : '3.9'
 services:
   external_dev:  # External API for development
     extends:
-      file: docker-compose.yml
+      file: docker-compose-base.yml
       service: external
     build:
       context: ./external
@@ -19,7 +19,7 @@ services:
     environment:
       DEBUG: true
     ports:
-    -   8888:8000
+    -   "8888:8000"
     volumes:
     -   ./external/src:/src
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
@@ -27,7 +27,7 @@ services:
 
   auth_dev:  # auth API for development
     extends:
-      file: docker-compose.yml
+      file: docker-compose-base.yml
       service: auth
     build:
       context: ./auth
@@ -42,7 +42,7 @@ services:
       postgres:
         condition: service_healthy
     ports:
-    -   8000:8000
+    -   "8000:8000"
     volumes:
     -   ./auth/src:/src
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
@@ -60,7 +60,7 @@ services:
 
   admin_dev:  # Admin for development
     extends:
-      file: docker-compose.yml
+      file: docker-compose-base.yml
       service: admin
     build:
       context: ./admin
@@ -71,7 +71,7 @@ services:
       DEBUG: true
       SERVICE_AUTH_API_BASE_PATH: http://auth_dev:8000/api/v1
     ports:
-    -   8080:8000    # Торчит наружу только при запущенном dev-сервере, на проде торчать не будет
+    -   "8080:8000"    # Торчит наружу только при запущенном dev-сервере, на проде торчать не будет
     volumes:
     -   ./admin:/src/app
     -   admin_data:/src/app/data
@@ -80,7 +80,7 @@ services:
 
   etl:
     extends:
-      file: docker-compose.yml
+      file: docker-compose-base.yml
       service: etl
     depends_on:
       postgres:
@@ -93,64 +93,41 @@ services:
 
   postgres:
     extends:
-      file: docker-compose.yml
+      file: docker-compose-base.yml
       service: postgres
     ports:
-    -   5432:5432
+    -   "5432:5432"
     profiles: [etl, admin_dev, auth_dev]
 
   elastic:
     extends:
-      file: docker-compose.yml
+      file: docker-compose-base.yml
       service: elastic
     profiles: [etl, external_dev, tests]
 
   redis:
     extends:
-      file: docker-compose.yml
+      file: docker-compose-base.yml
       service: redis
     profiles: [etl, external_dev, tests]
 
   redis_auth:
     extends:
-      file: docker-compose.yml
+      file: docker-compose-base.yml
       service: redis_auth
     profiles: [auth_dev]
 
   jaeger:
     extends:
-      file: docker-compose.yml
+      file: docker-compose-base.yml
       service: jaeger
     profiles: [auth_dev, external_dev, tests]
 
-  mongocfg1:
-    container_name: mongocfg1
+  mongo:
+    container_name: mongo
     image: mongo
-    command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/config1:/data/db
-
-  mongors1n1:
-    container_name: mongors1n1
-    image: mongo
-    command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/data1:/data/db
-
-  mongos1:
-    container_name: mongos1
-    image: mongo
-    depends_on:
-      - mongocfg1
-    command: mongos --configdb mongors1conf/mongocfg1:27017 --port 27017 --bind_ip_all
-    ports:
-      - 27017:27017
-    expose:
-      - "27017"
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
+      - mongo_db:/data/db
 
 
 volumes :
@@ -158,3 +135,4 @@ volumes :
   esdata:
   redis_data:
   admin_data:
+  mongo_db:

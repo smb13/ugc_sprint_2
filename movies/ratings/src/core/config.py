@@ -1,0 +1,35 @@
+import os
+from logging import config as logging_config
+
+from pydantic_settings import BaseSettings
+
+from core.logger import LOGGING
+
+# Применяем настройки логирования
+logging_config.dictConfig(LOGGING)
+
+
+class Settings(BaseSettings):
+    url_prefix: str = ""
+    debug: bool = False
+
+    # # Настройки Redis
+    # redis_host: str = "redis"
+    # redis_port: int = 6379
+    #
+    # # Настройки Elasticsearch
+    # elastic_host: str = "elastic"
+    # elastic_port: int = 9200
+
+    jwt_access_token_secret_key: str = "movies_token_secret"
+    jwt_access_token_expires_minutes: int = 60
+    jwt_refresh_token_secret_key: str = "movies_refresh_secret"
+    jwt_refresh_token_expires_minutes: int = 60 * 24 * 7
+
+    jaeger_agent_port: int = 6831
+
+
+# Корень проекта
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+settings = Settings()
