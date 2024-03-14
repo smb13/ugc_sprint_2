@@ -1,66 +1,78 @@
----
-version : "3.9"
+version: "3.9"
+
+x-base-settings: &base-settings
+  env_file: ./.env
+  restart: on-failure
 
 services:
-  logstash:
-    image: logstash:8.12.2
-    environment:
-      # Так как сейчас вы хотите запустить logstash без Elasticsearch, необходимо отключить встроенный мониторинг, отправляющий данные в ES
-      XPACK_MONITORING_ENABLED: "false"
-      ES_HOST: "elasticsearch:9200"
-    ports:
-      - "5044:5044/udp"
-    volumes:
-      - ./deploy/logstash.conf:/config/logstash.conf:ro
-    command: logstash -f /config/logstash.conf
-
   elasticsearch:
     image: elasticsearch:8.12.2
     environment:
-      # Указываем ES запуститься в одном экземпляре
-      - discovery.type=single-node
-      # Пока не будем беспокоиться о безопасности
-      - xpack.security.enabled=false
+      - "discovery.type=single-node"
+      - "bootstrap.memory_lock=true"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx2g"
+      - "ELASTIC_PASSWORD=changeme"
     ports:
-      - 9200:9200
+      - "9200:9200"
     volumes:
       - ./deploy/esdata:/usr/share/elasticsearch/data
+      - ./deploy/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     healthcheck:
-      test: [ CMD-SHELL, curl -s http://elasticsearch:9200/_cluster/health]
-      start_period: 15s
-      interval: 5s
-      timeout: 10s
-      retries: 10
+      test: [ CMD-SHELL, curl -s http://localhost:9200/_cluster/health ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
-#  filebeat:
-#    image: elastic/filebeat:8.12.2
-#    volumes:
-#      - ./deploy/filebeat.yml:/usr/share/filebeat/filebeat.yml
-#    depends_on:
-#      - logstash
-#      - elasticsearch
-#      - kibana
-#    links:
-#      - logstash
-
-
-#  metricbeat:
-#    image: elastic/metricbeat:8.12.2
-#    volumes:
-#      - ./deploy/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml
-#    depends_on:
-#      - logstash
-#      - elasticsearch
-#      - kibana
-#    links:
-#      - logstash
+  logstash:
+    image: logstash:8.12.2
+    <<: *base-settings
+    environment:
+      - "XPACK_MONITORING_ENABLED=false"
+      - "LOGSTASH_PASSWORD=changeme"
+    ports:
+      - "5044:5044/udp"
+    volumes:
+      - ./deploy/logstash.conf:/usr/share/logstash/config/logstash.conf
+      - ./deploy/logstash/pipeline:/usr/share/logstash/pipeline
+    command: logstash -f /usr/share/logstash/config/logstash.conf
+    depends_on:
+      - elasticsearch
 
   kibana:
     image: kibana:8.12.2
+    <<: *base-settings
+    environment:
+      - "ELASTICSEARCH_HOSTS=http://localhost:9200"
+      - "ELASTICSEARCH_USERNAME=elastic_user"
+      - "ELASTICSEARCH_PASSWORD=changeme"
     ports:
       - "5601:5601"
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     depends_on:
       elasticsearch:
         condition: service_healthy
+
+
+#  filebeat-nginx:
+#    profiles: ["prod"]
+#    image: elastic/filebeat:8.12.0
+#    volumes:
+#      - nginx_logs:/var/log/nginx:ro
+#      - ./filebeat/filebeat_nginx.yml:/usr/share/filebeat/filebeat.yml
+#    depends_on:
+#      - nginx
+#      - logstash
+#
+#  filebeat-ugc:
+#    profiles: ["prod"]
+#    image: elastic/filebeat:8.12.0
+#    volumes:
+#      - ugc_logs:/var/log/ugc/:ro
+#      - ./filebeat/filebeat_ugc.yml:/usr/share/filebeat/filebeat.yml
+#    depends_on:
+#      - ugc
+#      - logstash
