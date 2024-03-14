@@ -18,3 +18,5 @@ pydantic==2.4.2
 python-jose[cryptography]==3.3.0
 
 pydantic-settings==2.0.3
+
+sentry-sdk==1.42.0
