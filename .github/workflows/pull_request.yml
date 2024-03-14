@@ -29,7 +29,8 @@ jobs:
       continue-on-error: true
     - name: Run mypy (Type check)
       run: |
-        mypy ./
+        mypy ./analytics
+        mypy ./kafka_to_clickhouse
 
   test:
     needs: lint-and-type-check
