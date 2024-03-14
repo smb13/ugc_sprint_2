@@ -174,6 +174,26 @@ admin_generate_secret_key_dev:
 	@docker compose $(DOCKER_COMPOSE_DEV) run --rm admin_dev bash -c \
 	'python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"'
 
+# Mongo DB
+
+mongo_dev: # Запуск всех контейнеров
+	docker compose $(DOCKER_COMPOSE_DEV) up -d mongocfg1 mongors1n1 mongos1
+
+mongo_dev_first_start: mongo_dev mongo_config mongo_config_shards mongo_config_routers_shards # Первый запуск
+
+mongo_config: # Конфигурация серверов конфигурации
+	docker compose $(DOCKER_COMPOSE_DEV) exec -it mongocfg1 bash -c 'echo "rs.initiate({_id: \"mongors1conf\", configsvr: true, members: [{_id: 0, host: \"mongocfg1\"}]})" | mongosh'
+
+mongo_config_shards: # Конфигурация шардов
+	docker exec -it mongors1n1 bash -c 'echo "rs.initiate({_id: \"mongors1\", members: [{_id: 0, host: \"mongors1n1\"}]})" | mongosh'
+
+mongo_config_routers_shards: # Конфигурация роутеров
+	docker exec -it mongos1 bash -c 'echo "sh.addShard(\"mongors1/mongors1n1\")" | mongosh'
+
+mongo_logs: # Журнал
+	docker compose $(DOCKER_COMPOSE_DEV) logs --tail 100 -f
+
+
 # Stop & Down
 
 stop:
