@@ -7,33 +7,28 @@ x-base-settings: &base-settings
 services:
   elasticsearch:
     image: elasticsearch:8.12.2
+    <<: *base-settings
     environment:
-      - "discovery.type=single-node"
-      - "bootstrap.memory_lock=true"
-      - "ES_JAVA_OPTS=-Xms512m -Xmx2g"
-      - "ELASTIC_PASSWORD=changeme"
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms512m -Xmx1g
+      - xpack.security.enabled=false
     ports:
       - "9200:9200"
     volumes:
       - ./deploy/esdata:/usr/share/elasticsearch/data
-      - ./deploy/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
     healthcheck:
-      test: [ CMD-SHELL, curl -s http://localhost:9200/_cluster/health ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: [ CMD-SHELL, curl -s http://elasticsearch:9200/_cluster/health ]
+      interval: 20s
+      timeout: 15s
+      retries: 20
       start_period: 30s
 
   logstash:
     image: logstash:8.12.2
     <<: *base-settings
     environment:
-      - "XPACK_MONITORING_ENABLED=false"
-      - "LOGSTASH_PASSWORD=changeme"
+      - XPACK_MONITORING_ENABLED=false
     ports:
       - "5044:5044/udp"
     volumes:
@@ -46,10 +41,6 @@ services:
   kibana:
     image: kibana:8.12.2
     <<: *base-settings
-    environment:
-      - "ELASTICSEARCH_HOSTS=http://localhost:9200"
-      - "ELASTICSEARCH_USERNAME=elastic_user"
-      - "ELASTICSEARCH_PASSWORD=changeme"
     ports:
       - "5601:5601"
     depends_on:
@@ -57,22 +48,15 @@ services:
         condition: service_healthy
 
 
-#  filebeat-nginx:
-#    profiles: ["prod"]
+#  filebeat-<name_service>:
 #    image: elastic/filebeat:8.12.0
 #    volumes:
-#      - nginx_logs:/var/log/nginx:ro
-#      - ./filebeat/filebeat_nginx.yml:/usr/share/filebeat/filebeat.yml
+#      - filebeat_logs:/var/log/filebeat/:ro
+#      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
 #    depends_on:
-#      - nginx
+#      - <name_service>
 #      - logstash
-#
-#  filebeat-ugc:
-#    profiles: ["prod"]
-#    image: elastic/filebeat:8.12.0
+
+# Данный volume также прописать в приложении где планируется собирать логи в файле
 #    volumes:
-#      - ugc_logs:/var/log/ugc/:ro
-#      - ./filebeat/filebeat_ugc.yml:/usr/share/filebeat/filebeat.yml
-#    depends_on:
-#      - ugc
-#      - logstash
+#      - filebeat_logs:/var/log/filebeat/:ro

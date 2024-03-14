@@ -2,11 +2,17 @@ filebeat.inputs:
 - type: filestream
   enabled: true
   paths:
-    - /var/log/nginx/*
+    - /var/log/filebeat/*.json
+  multiline.pattern: "^\["
+  multiline.negate: true
+  multiline.match: after
+#  fields:
+#    service_name: # укажите тут service_name если нужно
+  tags: [ "apps" ]
   json:
     keys_under_root: true
     add_error_key: true
 
 output.logstash:
   enabled: true
-  hosts: ["logstash:5045"] # указать хост где расположен logstash
+  hosts: ["logstash:5045"]
