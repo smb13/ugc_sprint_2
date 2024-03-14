@@ -1,10 +1,28 @@
 import logging
 import sys
+import os
+
+import sentry_sdk
+from sentry_sdk.integrations.logging import LoggingIntegration
 
 log = logging.getLogger("authlib")
 log.addHandler(logging.StreamHandler(sys.stdout))
 log.setLevel(logging.DEBUG)
 
+# Инициализация Sentry SDK если есть env SENTRY_DSN
+if SENTRY_DSN := os.getenv("SENTRY_DSN"):
+
+    sentry_logging = LoggingIntegration(
+        level=logging.WARNING,  # Захват логов уровня WARNING и выше
+        event_level=logging.ERROR  # Отправка событий в Sentry начиная с уровня ERROR
+    )
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[sentry_logging],
+        traces_sample_rate=1.0,
+        profiles_sample_rate=1.0,
+    )
 
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 LOG_DEFAULT_HANDLERS = ["console"]
