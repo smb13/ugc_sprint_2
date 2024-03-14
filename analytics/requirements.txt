@@ -8,3 +8,4 @@ werkzeug==3.0.1
 async-fastapi-jwt-auth==0.6.3
 aiokafka==0.10.0
 python-jose[cryptography]==3.3.0
+sentry-sdk==1.42.0
