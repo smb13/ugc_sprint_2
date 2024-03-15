@@ -7,6 +7,7 @@ from async_fastapi_jwt_auth import AuthJWT
 from fastapi import Depends, HTTPException
 
 from pymongo import MongoClient
+from pymongo.command_cursor import CommandCursor
 
 from core.config import settings
 from db.mongo import get_mongo
@@ -33,14 +34,17 @@ class ReviewService(BaseService):
         # TODO: Удалить лайки.
 
     async def get_review(self, movie_id: UUID) -> ReviewResponse:
-        res = self.db_review().find_one({
-            'movie_id': bson.Binary.from_uuid(movie_id),
-            'user_id': (await self.jwt.get_raw_jwt())['sub']
-        })
-        if not res:
-            raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
-        print(res)
-        return ReviewResponse(**res)
+        cursor = await self.__get_review_list(
+            match_stage={
+                "$match": {
+                    "movie_id": bson.Binary.from_uuid(movie_id),
+                    "user_id": (await self.jwt.get_raw_jwt())['sub']
+                }
+            })
+        try:
+            return ReviewResponse(**cursor.next())
+        except StopIteration:
+            return ReviewResponse(review="")
 
     async def like(self, movie_id: UUID, review_id: str) -> None:
         self.db_review_ratings().update_one({
@@ -64,8 +68,17 @@ class ReviewService(BaseService):
         })
 
     async def get_review_list(self, movie_id: UUID) -> list[ReviewResponse]:
-        return [ReviewResponse(**res) for res in self.db_review().aggregate([
-            {"$match": {"movie_id": bson.Binary.from_uuid(movie_id)}},
+        return [ReviewResponse(**res) for res in await self.__get_review_list(
+            match_stage={
+                "$match": {
+                    "movie_id": bson.Binary.from_uuid(movie_id)
+                }
+            }
+        )]
+
+    async def __get_review_list(self, match_stage) -> CommandCursor:
+        return self.db_review().aggregate([
+            match_stage,
             {"$lookup": {
                 "from": settings.mongo_review_rating_collection,
                 "localField": "_id",
@@ -95,7 +108,7 @@ class ReviewService(BaseService):
                 "dislikes": "$ratings.dislikes",
                 "average": "$ratings.average"
             }}
-        ])]
+        ])
 
 
 @lru_cache
