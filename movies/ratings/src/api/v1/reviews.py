@@ -1,56 +1,55 @@
-from http import HTTPStatus
-# from typing import Annotated
-from uuid import UUID
 import uuid
+from http import HTTPStatus
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Path
-#
-# from api.v1.fields import PageNumberQueryType, PageSizeQueryType
-# from api.v1.models import FilmDetailExternal, FilmPersonExternal, FilmShortExternal, FilmsSortKeys, GenreExternal
-# from core.auth import JWTTokenPayload, SystemRolesEnum, check_permissions
-# from core.config import settings
-# from core.types import NestedQuery, RequestData
-# from models.film import Film as FilmInternal
-# from services.base import BaseService
-# from services.films import get_films_service
-
-# from uuid import UUID
-
+from fastapi import APIRouter, Depends, Path
 from fastapi.security import HTTPBearer
 
-# from schemas.ratings import RatingsResponse
-# from services.ratings import RatingService, get_rating_service
+from schemas.review import ReviewCreatedResponse, ReviewRequest, ReviewData
+from services.reviews import ReviewService, get_review_service
 
 router = APIRouter(redirect_slashes=False)
 
 
 @router.post(
     path="/{movie_id}",
-    summary="Добавление лайка фильму",
+    summary="Добавление рецензии на фильм",
     status_code=HTTPStatus.CREATED,
     dependencies=[Depends(HTTPBearer())],
 )
-async def like_movie(
+async def add_review(
+    request: ReviewRequest,
     movie_id: UUID = Path(..., description="Идентификатор фильма", example=uuid.uuid4()),
-    # rating_service: RatingService = Depends(get_rating_service),
+    review_service: ReviewService = Depends(get_review_service),
+) -> ReviewCreatedResponse:
+    return await review_service.add_review(movie_id, **request.dict())
+
+
+@router.delete(
+    path="/{movie_id}",
+    summary="Удаление рецензии на фильм",
+    status_code=HTTPStatus.CREATED,
+    dependencies=[Depends(HTTPBearer())],
+)
+async def remove_review(
+    movie_id: UUID = Path(..., description="Идентификатор фильма", example=uuid.uuid4()),
+    review_service: ReviewService = Depends(get_review_service),
 ) -> None:
-    # await rating_service.set_like(movie_id)
-    pass
+    await review_service.remove_review(movie_id)
 
 
 @router.post(
     path="/{movie_id}/{review_id}/like",
     summary="Добавление лайка к рецензии на фильм",
     status_code=HTTPStatus.CREATED,
-    dependencies=[Depends(HTTPBearer())],
+    dependencies=[Depends(HTTPBearer())]
 )
-async def like_movie(
+async def like_review(
     movie_id: UUID = Path(..., description="Идентификатор фильма", example=uuid.uuid4()),
-    review_id: UUID = Path(..., description="Идентификатор рецензии", example=uuid.uuid4()),
-    # rating_service: RatingService = Depends(get_rating_service),
+    review_id: str = Path(..., description="Идентификатор рецензии", example='65f3876c82f344ecf4de0595'),
+    review_service: ReviewService = Depends(get_review_service),
 ) -> None:
-    # await rating_service.set_dislike(movie_id)
-    pass
+    await review_service.like(movie_id, review_id)
 
 
 @router.post(
@@ -59,24 +58,35 @@ async def like_movie(
     status_code=HTTPStatus.CREATED,
     dependencies=[Depends(HTTPBearer())],
 )
-async def like_movie(
+async def dislike_movie(
     movie_id: UUID = Path(..., description="Идентификатор фильма", example=uuid.uuid4()),
-    review_id: UUID = Path(..., description="Идентификатор рецензии", example=uuid.uuid4()),
-    # rating_service: RatingService = Depends(get_rating_service),
+    review_id: str = Path(..., description="Идентификатор рецензии", example=uuid.uuid4()),
+    review_service: ReviewService = Depends(get_review_service),
 ) -> None:
-    # await rating_service.set_rating(movie_id, rating)
-    pass
+    await review_service.dislike(movie_id, review_id)
 
 
 @router.get(
     path="/{movie_id}",
-    summary="Получение списка рецензий на фильм",
+    summary="Получение рецензии на фильм",
     status_code=HTTPStatus.OK,
     dependencies=[Depends(HTTPBearer())],
 )
-async def get_ratings(
+async def get_review(
     movie_id: UUID = Path(..., description="Идентификатор фильма", example=uuid.uuid4()),
-    # rating_service: RatingService = Depends(get_rating_service),
-) -> None:
-    # return await rating_service.get_rating(movie_id)
-    pass
+    review_service: ReviewService = Depends(get_review_service),
+) -> ReviewData:
+    return await review_service.get_review(movie_id)
+
+
+@router.get(
+    path="/{movie_id}/list",
+    summary="Получение список рецензий на фильм",
+    status_code=HTTPStatus.OK,
+    dependencies=[Depends(HTTPBearer())],
+)
+async def get_review(
+    movie_id: UUID = Path(..., description="Идентификатор фильма", example=uuid.uuid4()),
+    review_service: ReviewService = Depends(get_review_service),
+) -> list[ReviewData]:
+    return await review_service.get_review_list(movie_id)
