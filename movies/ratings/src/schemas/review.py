@@ -1,23 +1,32 @@
 from pydantic import Field, BaseModel, ConfigDict
 
-class ReviewData(BaseModel):
+
+class ReviewRequest(BaseModel):
     review: str = Field(
         description="Текст рецензии на фильм",
         examples=["Этот фильм просто отвратительный!"]
     )
 
+class ReviewResponse(ReviewRequest):
+    """
+        Результат запроса рецензии.
+    """
 
-class ReviewRequest(ReviewData):
-    rating: int | None = Field(
-        default=None,
-        description="Оценка фильма",
-        examples=[7]
+    """Количество лайков у рецензии"""
+    likes: int | None = Field(
+        0,
+        description="Количества лайков у фильма",
+        example=1,
     )
-
-
-class ReviewCreatedResponse(BaseModel):
-    """Количества лайков у фильма"""
-    review_id: str = Field(
-        description="Идентификатор рецензии",
-        examples=["65f3964582f344ecf4de0c5c"]
+    """Количество дизлайков у рецензии"""
+    dislikes: int | None = Field(
+        0,
+        description="Количества дизлайков у фильма",
+        example=123,
+    )
+    """Средняя пользовательская оценка фильма"""
+    average: float | None = Field(
+        0,
+        description="Средняя пользовательская оценка фильма",
+        example=2.3,
     )

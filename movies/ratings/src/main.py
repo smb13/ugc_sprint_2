@@ -21,6 +21,9 @@ async def lifespan(_: FastAPI) -> AsyncGenerator:
     mongo.mongo[settings.mongo_db][settings.mongo_rating_collection].create_index(
         ['movie_id', 'user_id'], unique=True, background=True
     )
+    mongo.mongo[settings.mongo_db][settings.mongo_review_collection].create_index(
+        ['movie_id', 'user_id'], unique=True, background=True
+    )
     yield
     mongo.mongo.close()
 
