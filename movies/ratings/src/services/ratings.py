@@ -10,9 +10,6 @@ from db.mongo import get_mongo
 
 from schemas.ratings import RatingsResponse
 
-
-# # from models.message import Message
-# # from schemas.event import CreateEventResponse, UserEvent
 from core.config import settings
 
 
@@ -46,30 +43,20 @@ class RatingService:
         })
 
     async def get_rating(self, movie_id: UUID) -> RatingsResponse:
-        # Проверить наличие фильма в базе.
         db = self.mongo[settings.mongo_db][settings.mongo_rating_collection]
-        response = RatingsResponse(average=0)
         for rating in db.aggregate([
             {"$match": {"movie_id": bson.Binary.from_uuid(movie_id)}},
-            {"$group": {"_id": "$rating", "count": {"$count": {}}}}
+            {"$group": {
+                "_id": "$movie_id",
+                "total": {"$sum": 1},
+                "likes": {"$sum": {"$cond": [{"$eq": ["$rating", 10]}, 1, 0]}},
+                "dislikes": {"$sum": {"$cond": [{"$eq": ["$rating", 1]}, 1, 0]}},
+                "average": {"$avg": "$rating"},
+                "rating": {
+                    "$sum": {"$cond": [{"$eq": ["$user_id", (await self.jwt.get_raw_jwt())['sub']]}, "$rating", 0]}}}}
         ]):
-            if rating['_id'] == 0:
-                response.dislikes = rating['count']
-            elif rating['_id'] == 10:
-                response.likes = rating['count']
-
-            response.average += rating['_id']*rating['count']
-            response.count += rating['count']
-        if response.count != 0:
-            response.average /= response.count
-
-        cursor = db.find_one({
-            "movie_id": bson.Binary.from_uuid(movie_id),
-            "user_id": (await self.jwt.get_raw_jwt())['sub']
-        })
-        if cursor:
-            response.rating = cursor['rating']
-        return response
+            return RatingsResponse(**rating)
+        return RatingsResponse()
 
 
 @lru_cache

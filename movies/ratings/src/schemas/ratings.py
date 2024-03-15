@@ -29,7 +29,7 @@ class RatingsResponse(BaseModel):
         example=2.3,
     )
 
-    count: int | None = Field(
+    total: int | None = Field(
         0,
         description="Число оценок фильма"
     )
