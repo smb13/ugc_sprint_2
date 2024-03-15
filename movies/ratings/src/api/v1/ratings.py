@@ -30,7 +30,7 @@ async def like_movie(
     status_code=HTTPStatus.CREATED,
     dependencies=[Depends(HTTPBearer())],
 )
-async def like_movie(
+async def dislike_movie(
     movie_id: UUID = Path(..., description="Идентификатор фильма", example=uuid.uuid4()),
     rating_service: RatingService = Depends(get_rating_service),
 ) -> None:
@@ -43,7 +43,7 @@ async def like_movie(
     status_code=HTTPStatus.CREATED,
     dependencies=[Depends(HTTPBearer())],
 )
-async def like_movie(
+async def set_rating(
     movie_id: UUID = Path(..., description="Идентификатор фильма", example=uuid.uuid4()),
     rating: int = Path(default=..., description="Значение рейтинга", example=5, gt=0, lt=10),
     rating_service: RatingService = Depends(get_rating_service),
@@ -57,7 +57,7 @@ async def like_movie(
     status_code=HTTPStatus.CREATED,
     dependencies=[Depends(HTTPBearer())],
 )
-async def like_movie(
+async def remove_rating(
     movie_id: UUID = Path(..., description="Идентификатор фильма", example=uuid.uuid4()),
     rating_service: RatingService = Depends(get_rating_service),
 ) -> None:

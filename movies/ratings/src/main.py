@@ -6,11 +6,11 @@ import uvicorn
 from async_fastapi_jwt_auth import AuthJWT
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import ORJSONResponse
-# from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 from api.routers import all_v1_routers
 from core.config import settings
-# from core.tracer import configure_tracer
+from core.tracer import configure_tracer
 
 from db import mongo
 
@@ -18,6 +18,9 @@ from db import mongo
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncGenerator:
     mongo.connect(settings.mongo_dsn)
+    mongo.mongo[settings.mongo_db][settings.mongo_rating_collection].create_index(
+        ['movie_id', 'user_id'], unique=True, background=True
+    )
     yield
     mongo.mongo.close()
 
@@ -37,11 +40,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+configure_tracer()
+FastAPIInstrumentor.instrument_app(app)
+
 app.include_router(all_v1_routers)
-
-
-# configure_tracer()
-# FastAPIInstrumentor.instrument_app(app)
 
 
 @app.middleware("http")

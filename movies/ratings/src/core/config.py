@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     mongo_rating_collection: str = "ratings"
 
     jaeger_agent_port: int = 6831
+    jaeger_agent_host: str = "jaeger"
 
 
 # Корень проекта
