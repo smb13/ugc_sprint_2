@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from http import HTTPStatus
 
 import uvicorn
+from async_fastapi_jwt_auth import AuthJWT
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import ORJSONResponse
 # from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
@@ -10,19 +11,20 @@ from fastapi.responses import ORJSONResponse
 from api.routers import all_v1_routers
 from core.config import settings
 # from core.tracer import configure_tracer
-# from db import elastic, redis
+
+from db import mongo
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncGenerator:
-    #     redis.redis = Redis(host=settings.redis_host, port=settings.redis_port)
-    #     elastic.es = AsyncElasticsearch(
-    #         hosts=[{"host": settings.elastic_host, "port": settings.elastic_port, "scheme": "http"}],
-    #     )
+    mongo.connect(settings.mongo_dsn)
     yield
-    #     await redis.redis.close()
-    #     await elastic.es.close()
-    pass
+    mongo.mongo.close()
+
+
+@AuthJWT.load_config
+def get_config() -> object:
+    return settings
 
 
 app = FastAPI(
@@ -40,7 +42,7 @@ app.include_router(all_v1_routers)
 
 # configure_tracer()
 # FastAPIInstrumentor.instrument_app(app)
-#
+
 
 @app.middleware("http")
 async def before_request(request: Request, call_next: Callable) -> Response:
