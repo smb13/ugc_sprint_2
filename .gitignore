@@ -120,17 +120,18 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-movies/.env
 .venv
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
-analytics/.env
 # Spyder project settings
 .spyderproject
 .spyproject
+
+# Environment variables
+.env
 
 # Rope project settings
 .ropeproject
@@ -158,4 +159,3 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
-*.csv

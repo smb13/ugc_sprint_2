@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, Path
+from fastapi import APIRouter
 
 from schemas.error import HttpExceptionModel
 from schemas.event import CreateEventResponse, HealthCheckResponse
@@ -20,5 +20,5 @@ router = APIRouter(redirect_slashes=False, prefix="", tags=["Health check"])
         HTTPStatus.INTERNAL_SERVER_ERROR: {"model": HttpExceptionModel},
     },
 )
-async def health_check() -> CreateEventResponse:
-    return {"status": "ok"}
+async def health_check() -> HealthCheckResponse:
+    return HealthCheckResponse(status="ok")

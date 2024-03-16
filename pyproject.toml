@@ -51,7 +51,6 @@ ignore_missing_imports = true  # error: Skipping analyzing "wfm_admin.utils": mo
 no_strict_optional = false
 python_version='3.11'
 check_untyped_defs = true
-implicit-optional = true
 warn_no_return = false # error: Missing return statement  [return]
 warn_unreachable = false # error: Statement is unreachable  [unreachable]
 allow_redefinition = true

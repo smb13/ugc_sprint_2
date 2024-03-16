@@ -40,7 +40,7 @@ class EventService:
             topic = "user"
         if event.value:
             value_dict.update(event.value)
-        value = json.dumps(value_dict)
+        value = json.dumps(value_dict).encode('utf-8')
 
         key = (await self.jwt.get_raw_jwt())["sub"]
 
