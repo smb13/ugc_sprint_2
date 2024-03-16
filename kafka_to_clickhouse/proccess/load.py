@@ -22,8 +22,6 @@ class ClickhouseLoader:
             write_batches = defaultdict(list)
 
             for table_name, model_data in data_batch:
-                table_name: str
-                model_data: BaseModel
 
                 logger.info(f"Saving in table {table_name}")
 

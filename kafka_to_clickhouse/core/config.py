@@ -28,12 +28,12 @@ class ClickhouseSettings(BaseSettings):
         env_file=ENV_PATH,
         env_file_encoding="utf-8",
     )
-    host: str = ...
+    host: str = Field(default="")
     port: int = Field(default=9000)
     database: str = Field(default="")
     user: str = Field(default="default")
     password: str = Field(default="")
-    alt_hosts: str = ...
+    alt_hosts: str = Field(default="")
 
 
 class KafkaSettings(BaseSettings):
