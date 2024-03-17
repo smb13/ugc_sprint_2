@@ -5,6 +5,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Path, Query
 from fastapi.security import HTTPBearer
 
+from core.config import settings
 from schemas.review import ReviewRequest, ReviewResponse, ReviewSortKeys
 from services.reviews import ReviewService, get_review_service
 
@@ -103,5 +104,9 @@ async def get_review(
     movie_id: UUID = Path(..., description="Идентификатор фильма", example=uuid.uuid4()),
     review_service: ReviewService = Depends(get_review_service),
     sort: ReviewSortKeys = Query(default=None, description="Ordering param"),
+    page: int = Query(default=1, description="Pagination page number", ge=1),
+    page_size: int = Query(
+        default=settings.page_size, description="Pagination page size", ge=1, le=settings.page_size_max
+    )
 ) -> list[ReviewResponse]:
-    return await review_service.get_review_list(movie_id, sort)
+    return await review_service.get_review_list(movie_id, sort, page, page_size)

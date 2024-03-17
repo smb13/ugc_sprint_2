@@ -42,3 +42,19 @@ class ReviewResponse(ReviewRequest):
         description="Средняя пользовательская оценка фильма",
         example=2.3,
     )
+
+
+class ReviewList(BaseModel):
+    """
+        Список отзывов
+    """
+
+    total: int = Field(
+        default=0,
+        description="Общее число найденных отзывов",
+        example=17
+    )
+
+    reviews: list[ReviewResponse] = Field(
+        description="Список отзывов"
+    )
