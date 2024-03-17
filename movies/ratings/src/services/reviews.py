@@ -10,7 +10,7 @@ from pymongo import MongoClient
 
 from core.config import settings
 from db.mongo import get_mongo
-from schemas.review import ReviewResponse, ReviewSortKeys, ReviewList
+from schemas.review import ReviewResponse, ReviewSortKeys, ReviewListResponse
 from services.base import BaseService
 
 
@@ -65,17 +65,19 @@ class ReviewService(BaseService):
 
     async def get_review_list(
             self, movie_id: UUID, sort: ReviewSortKeys,page: int = 1, page_size: int = settings.page_size
-    ) -> list[ReviewResponse]:
+    ) -> ReviewListResponse:
         sort_split = split('_', sort.name if sort else "")
         return (await self.__get_review_list(
             match_stage={"$match": {"movie_id": bson.Binary.from_uuid(movie_id)}},
             sort_stage={"$sort": {sort_split[0]: 1 if sort_split[1] == 'desc' else -1}} if sort else None,
             skip=(page - 1) * page_size,
             limit=page_size
-        )).reviews
+        ))
 
-    async def __get_review_list(self, match_stage=None, sort_stage=None, skip=None, limit=None) -> ReviewList:
-        return ReviewList(**self.db_review().aggregate(list(filter(None, [
+    ReviewListResponse.total
+
+    async def __get_review_list(self, match_stage=None, sort_stage=None, skip=None, limit=None) -> ReviewListResponse:
+        return ReviewListResponse(**self.db_review().aggregate(list(filter(None, [
             match_stage,
             {"$lookup": {
                 "from": settings.mongo_review_rating_collection,

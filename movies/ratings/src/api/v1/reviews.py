@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Path, Query
 from fastapi.security import HTTPBearer
 
 from core.config import settings
-from schemas.review import ReviewRequest, ReviewResponse, ReviewSortKeys
+from schemas.review import ReviewRequest, ReviewResponse, ReviewSortKeys, ReviewListResponse
 from services.reviews import ReviewService, get_review_service
 
 router = APIRouter(redirect_slashes=False)
@@ -100,7 +100,7 @@ async def dislike_movie(
     status_code=HTTPStatus.OK,
     dependencies=[Depends(HTTPBearer())],
 )
-async def get_review(
+async def get_review_list(
     movie_id: UUID = Path(..., description="Идентификатор фильма", example=uuid.uuid4()),
     review_service: ReviewService = Depends(get_review_service),
     sort: ReviewSortKeys = Query(default=None, description="Ordering param"),
@@ -108,5 +108,5 @@ async def get_review(
     page_size: int = Query(
         default=settings.page_size, description="Pagination page size", ge=1, le=settings.page_size_max
     )
-) -> list[ReviewResponse]:
+) -> ReviewListResponse:
     return await review_service.get_review_list(movie_id, sort, page, page_size)
