@@ -13,16 +13,19 @@ from services.users import UsersService, get_users_service
 from utils.generate_data import generate_password
 
 USER_INFO_YA_URL = "https://login.yandex.ru/info?format=json"
+YA_ACCESS_TKN_URL = "https://oauth.yandex.ru/token"
+YA_AUTHORIZE_URL = "https://oauth.yandex.ru/authorize"
+YA_API_BASE_URL = "https://login.yandex.ru/"
 
 oauth.register(
     name="yandex",
     client_id=settings.yandex_client_id,
     client_secret=settings.yandex_client_secret,
-    access_token_url="https://oauth.yandex.ru/token",
+    access_token_url=YA_ACCESS_TKN_URL,
     access_token_params=None,
-    authorize_url="https://oauth.yandex.ru/authorize",
+    authorize_url=YA_AUTHORIZE_URL,
     authorize_params=None,
-    api_base_url="https://login.yandex.ru/",
+    api_base_url=YA_API_BASE_URL,
     client_kwargs={
         "scope": "login:email login:info login:avatar",
         "force_confirm": "yes",

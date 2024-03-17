@@ -53,7 +53,7 @@ async def persons_list(
             full_name=person.name,
             films=[
                 PersonFilmExternal(uuid=film_id, roles=[film.role for film in group])
-                for film_id, group in groupby(person.films, key=lambda x: x.id) or []
+                for film_id, group in groupby(person.films, key=lambda x: x.id) or []  # type: ignore
             ],
         )
         for person in persons
@@ -126,6 +126,6 @@ async def person_details(
         full_name=person.name,
         films=[
             PersonFilmExternal(uuid=film_id, roles=[film.role for film in group])
-            for film_id, group in groupby(person.films, key=lambda x: x.id) or []
+            for film_id, group in groupby(person.films, key=lambda x: x.id) or []  # type: ignore
         ],
     )
