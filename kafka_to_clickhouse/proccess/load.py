@@ -18,7 +18,7 @@ class ClickhouseLoader:
     @get_value_from_generator
     @backoff.on_exception(backoff.expo, Exception, logger=logger, max_tries=settings.project.backoff_max_tries)
     def run(self, click: ClickhouseAccessor) -> Generator[None, List[Tuple[str, ModelsSchemas]], None]:
-        while data_batch := (yield):
+        while data_batch := (yield):  # type: ignore
             write_batches = defaultdict(List)
 
             for table_name, model_data in data_batch:
