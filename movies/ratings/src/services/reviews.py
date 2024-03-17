@@ -26,17 +26,13 @@ class ReviewService(BaseService):
         }, {'$set': {'review': review}}, upsert=True)
 
     async def remove_review(self, movie_id: UUID) -> None:
-        a = await self.get_review(movie_id)
-        # a = self.db_review().delete_one({
-        #     'movie_id': bson.Binary.from_uuid(movie_id),
-        #     'user_id': (await self.jwt.get_raw_jwt())['sub']
-        # })
-        print(a)
-        # self.db_review_ratings().delete_many({
-        #     'movie_id': bson.Binary.from_uuid(movie_id),
-        #     'user_id': (await self.jwt.get_raw_jwt())['sub'],
-        #     'review_id': bson.ObjectId(review_id)
-        # })
+        review = await self.get_review(movie_id)
+        self.db_review_ratings().delete_many({
+            'movie_id': bson.Binary.from_uuid(movie_id),
+            'review_id': bson.ObjectId(review.review_id)
+        })
+        self.db_review().delete_one({'_id': bson.ObjectId(review.review_id)})
+
 
     async def get_review(self, movie_id: UUID) -> ReviewResponse:
         result = await self.__get_review_list(
