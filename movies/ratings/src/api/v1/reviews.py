@@ -2,10 +2,10 @@ import uuid
 from http import HTTPStatus
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Path
+from fastapi import APIRouter, Depends, Path, Query
 from fastapi.security import HTTPBearer
 
-from schemas.review import ReviewRequest, ReviewResponse
+from schemas.review import ReviewRequest, ReviewResponse, ReviewSortKeys
 from services.reviews import ReviewService, get_review_service
 
 router = APIRouter(redirect_slashes=False)
@@ -102,5 +102,6 @@ async def dislike_movie(
 async def get_review(
     movie_id: UUID = Path(..., description="Идентификатор фильма", example=uuid.uuid4()),
     review_service: ReviewService = Depends(get_review_service),
+    sort: ReviewSortKeys = Query(default=None, description="Ordering param"),
 ) -> list[ReviewResponse]:
-    return await review_service.get_review_list(movie_id)
+    return await review_service.get_review_list(movie_id, sort)

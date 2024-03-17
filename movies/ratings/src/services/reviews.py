@@ -1,5 +1,6 @@
 from functools import lru_cache
 from http import HTTPStatus
+from re import split
 from uuid import UUID
 
 import bson
@@ -11,7 +12,7 @@ from pymongo.command_cursor import CommandCursor
 
 from core.config import settings
 from db.mongo import get_mongo
-from schemas.review import ReviewResponse
+from schemas.review import ReviewResponse, ReviewSortKeys
 from services.base import BaseService
 
 
@@ -67,17 +68,24 @@ class ReviewService(BaseService):
             'review_id': bson.ObjectId(review_id)
         })
 
-    async def get_review_list(self, movie_id: UUID) -> list[ReviewResponse]:
+    async def get_review_list(self, movie_id: UUID, sort: ReviewSortKeys) -> list[ReviewResponse]:
+        sort = split('_', sort.name)
+        print(sort)
         return [ReviewResponse(**res) for res in await self.__get_review_list(
             match_stage={
                 "$match": {
                     "movie_id": bson.Binary.from_uuid(movie_id)
                 }
+            },
+            sort_stage={
+                "$sort": {
+                   sort[0]: 1 if sort[1] == 'desc' else -1
+                }
             }
         )]
 
-    async def __get_review_list(self, match_stage) -> CommandCursor:
-        return self.db_review().aggregate([
+    async def __get_review_list(self, match_stage=None, sort_stage=None) -> CommandCursor:
+        return self.db_review().aggregate(list(filter(None, [
             match_stage,
             {"$lookup": {
                 "from": settings.mongo_review_rating_collection,
@@ -107,8 +115,9 @@ class ReviewService(BaseService):
                 "likes": "$ratings.likes",
                 "dislikes": "$ratings.dislikes",
                 "average": "$ratings.average"
-            }}
-        ])
+            }},
+            sort_stage
+        ])))
 
 
 @lru_cache

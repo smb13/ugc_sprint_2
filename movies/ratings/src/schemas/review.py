@@ -1,3 +1,5 @@
+from enum import Enum
+
 from pydantic import Field, BaseModel, ConfigDict
 
 
@@ -6,6 +8,16 @@ class ReviewRequest(BaseModel):
         description="Текст рецензии на фильм",
         examples=["Этот фильм просто отвратительный!"]
     )
+
+
+class ReviewSortKeys(str, Enum):
+    average_asc = "rating"
+    avergae_desc = "-rating"
+    likes_asc = "likes"
+    likes_desc = "-likes"
+    dislikes_asc = "dislikes"
+    dislikes_desc = "-dislikes"
+
 
 class ReviewResponse(ReviewRequest):
     """
