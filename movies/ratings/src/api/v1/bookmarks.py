@@ -1,25 +1,13 @@
-from http import HTTPStatus
-# from typing import Annotated
-from uuid import UUID
 import uuid
+from http import HTTPStatus
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Path
-#
-# from api.v1.fields import PageNumberQueryType, PageSizeQueryType
-# from api.v1.models import FilmDetailExternal, FilmPersonExternal, FilmShortExternal, FilmsSortKeys, GenreExternal
-# from core.auth import JWTTokenPayload, SystemRolesEnum, check_permissions
-# from core.config import settings
-# from core.types import NestedQuery, RequestData
-# from models.film import Film as FilmInternal
-# from services.base import BaseService
-# from services.films import get_films_service
-
-# from uuid import UUID
-
+from fastapi import APIRouter, Depends, Path, Query
 from fastapi.security import HTTPBearer
 
-# from schemas.ratings import RatingsResponse
-# from services.ratings import RatingService, get_rating_service
+from core.config import settings
+from schemas.bookmarks import BookmarksListResponse
+from services.bookmarks import BookmarksService, get_bookmark_service
 
 router = APIRouter(redirect_slashes=False)
 
@@ -32,47 +20,35 @@ router = APIRouter(redirect_slashes=False)
 )
 async def add_bookmark(
     movie_id: UUID = Path(..., description="Идентификатор фильма", example=uuid.uuid4()),
-    # rating_service: RatingService = Depends(get_rating_service),
+    bookmark_service: BookmarksService = Depends(get_bookmark_service),
 ) -> None:
-    # await rating_service.set_like(movie_id)
-    pass
+    await bookmark_service.add(movie_id)
 
 
 @router.delete(
     path="/{movie_id}",
     summary="Удаление фильма из закладок",
-    status_code=HTTPStatus.CREATED,
+    status_code=HTTPStatus.OK,
     dependencies=[Depends(HTTPBearer())],
 )
-async def like_movie(
+async def remove_bookmark(
     movie_id: UUID = Path(..., description="Идентификатор фильма", example=uuid.uuid4()),
-    # rating_service: RatingService = Depends(get_rating_service),
+    bookmark_service: BookmarksService = Depends(get_bookmark_service),
 ) -> None:
-    # await rating_service.set_dislike(movie_id)
-    pass
+    await bookmark_service.remove(movie_id)
 
 
 @router.get(
     path="/",
-    summary="Получение списка закладок",
-    status_code=HTTPStatus.CREATED,
+    summary="Получение списока закладок",
+    status_code=HTTPStatus.OK,
     dependencies=[Depends(HTTPBearer())],
 )
-async def like_movie(
-    # rating_service: RatingService = Depends(get_rating_service),
-) -> None:
-    # await rating_service.set_rating(movie_id, rating)
-    pass
-
-
-# @router.get(
-#     path="/{movie_id}",
-#     summary="Получение рейтинга фильма",
-#     status_code=HTTPStatus.OK,
-#     dependencies=[Depends(HTTPBearer())],
-# )
-# async def get_ratings(
-#     movie_id: UUID = Path(..., description="Идентификатор фильма", example=uuid.uuid4()),
-#     rating_service: RatingService = Depends(get_rating_service),
-# ) -> RatingsResponse:
-#     return await rating_service.get_rating(movie_id)
+async def get_bookmarks_list(
+    page: int = Query(default=1, description="Pagination page number", ge=1),
+    page_size: int = Query(
+        default=settings.page_size, description="Pagination page size", ge=1, le=settings.page_size_max
+    ),
+    bookmark_service: BookmarksService = Depends(get_bookmark_service),
+) -> BookmarksListResponse:
+    return await bookmark_service.list(page, page_size)

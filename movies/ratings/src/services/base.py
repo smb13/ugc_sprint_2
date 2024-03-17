@@ -21,3 +21,6 @@ class BaseService:
 
     def db_review_ratings(self):
         return self.mongo[settings.mongo_db][settings.mongo_review_rating_collection]
+
+    def db_bookmarks(self):
+        return self.mongo[settings.mongo_db][settings.mongo_bookmarks_collection]

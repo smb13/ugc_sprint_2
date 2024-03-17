@@ -102,11 +102,11 @@ async def dislike_movie(
 )
 async def get_review_list(
     movie_id: UUID = Path(..., description="Идентификатор фильма", example=uuid.uuid4()),
-    review_service: ReviewService = Depends(get_review_service),
     sort: ReviewSortKeys = Query(default=None, description="Ordering param"),
     page: int = Query(default=1, description="Pagination page number", ge=1),
     page_size: int = Query(
         default=settings.page_size, description="Pagination page size", ge=1, le=settings.page_size_max
-    )
+    ),
+    review_service: ReviewService = Depends(get_review_service)
 ) -> ReviewListResponse:
     return await review_service.get_review_list(movie_id, sort, page, page_size)

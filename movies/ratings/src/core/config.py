@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     mongo_rating_collection: str = "ratings"
     mongo_review_collection: str = "review"
     mongo_review_rating_collection: str = "review_rating"
+    mongo_bookmarks_collection: str = "bookmarks"
 
     jaeger_agent_port: int = 6831
     jaeger_agent_host: str = "jaeger"
