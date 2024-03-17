@@ -35,7 +35,7 @@ production:
 	docker compose $(DOCKER_COMPOSE_PROD) up -d
 
 dev:
-	docker compose $(DOCKER_COMPOSE_DEV) --profile external_dev --profile admin_dev --profile auth_dev up -d
+	docker compose $(DOCKER_COMPOSE_DEV) --profile external_dev --profile admin_dev --profile auth_dev --profile ratings_dev up -d
 
 # Redis
 
@@ -201,7 +201,7 @@ stop:
 
 stop_dev:
 	docker compose $(DOCKER_COMPOSE_DEV) --profile production --profile external_dev \
-	--profile admin_dev --profile tests  stop
+	--profile admin_dev --profile tests --profile auth_dev --profile ratings_dev  stop
 
 down:
 	docker compose $(DOCKER_COMPOSE_PROD) down --remove-orphans
