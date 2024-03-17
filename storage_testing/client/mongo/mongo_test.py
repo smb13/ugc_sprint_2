@@ -111,14 +111,14 @@ def main() -> None:
         users_amount = 10_000
         user_ids = get_user_ids(mongo_db, users_amount)
 
-        # Списки понравившихся пользователям фильмов (списки лайков пользователей).
+        # Списки понравившихся пользователям фильмов (списки лайков пользователей)
         with log_time("Mongo returns likes for users", len(user_ids)):
             fetch_users_likes(mongo_db, user_ids)
 
         films_amount = 10_000
         film_ids = get_film_ids(mongo_db, films_amount)
 
-        # Средняя пользовательская оценка фильма.
+        # Средняя пользовательская оценка фильма
         with log_time("Mongo returns ratings for films", len(film_ids)):
             fetch_film_ratings(mongo_db, film_ids)
 
@@ -132,7 +132,7 @@ def main() -> None:
         with log_time("Mongo writes user like and returns it", len(user_ids)):
             insert_and_fetch_user_like(mongo_db, user_ids)
 
-        # Добавление оценки пользователя и получение оценок этого пользователя
+        # Добавление оценки к фильму и получение средней пользовательской оценки этого фильма
         film_ids = get_film_ids(mongo_db, int(films_amount / 10)) * 10
         with log_time("Mongo writes user like and returns films rating", len(film_ids)):
             insert_likes_and_fetch_film_rating(mongo_db, film_ids)
