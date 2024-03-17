@@ -15,7 +15,7 @@ help: # Вывод информации make командах
 
 # Start, First start
 
-up: up_postgres up_mongo up_client # Запуск
+up: up_postgres up_mongo build_client # Запуск
 
 up_postgres: # Запуск Postgresql DB
 	docker compose $(DOCKER_COMPOSE) up -d postgres
@@ -23,14 +23,24 @@ up_postgres: # Запуск Postgresql DB
 up_mongo: # Запуск Mongo DB
 	docker compose $(DOCKER_COMPOSE) up -d mongocfg1 mongors1n1 mongos1
 
-up_client: # Запуск Mongo DB
-	docker compose $(DOCKER_COMPOSE) up -d --build --force-recreate client
+build_client: # Запуск Mongo DB
+	docker compose $(DOCKER_COMPOSE) build client
 
-first_start: first_start_mongo first_start_postgres # Первый запуск
+first_start: first_start_postgres first_start_mongo # Первый запуск
 
-first_start_mongo: up_mongo mongo_config_config mongo_config_shards mongo_config_routers # Первый запуск Mongo DB
+first_start_postgres: up_postgres postgres_drop_db postgres_create_db build_client postgres_populate_db # Первый запуск Postgresql DB
 
-first_start_postgres: up_postgres postgres_create_db # Первый запуск Postgresql DB
+first_start_mongo: up_mongo mongo_config_config mongo_config_shards mongo_config_routers build_client mongo_populate_db # Первый запуск Mongo DB
+
+# Запуск тестов
+
+run_tests: up postgres_run_tests mongo_run_tests
+
+postgres_run_tests: # Запуск тестов на Postgresql DB
+	docker compose $(DOCKER_COMPOSE) run -it client python3 ./postgres/postgres_test.py
+
+mongo_run_tests: # Запуск тестов на Mongo DB
+	docker compose $(DOCKER_COMPOSE) run -it client python3 ./mongo/mongo_test.py
 
 # Configuration
 
@@ -46,7 +56,20 @@ mongo_config_routers: # Конфигурация роутеров
 postgres_create_db: # Создание базы данных
 	docker compose $(DOCKER_COMPOSE) exec -it postgres bash -c "/etc/wait-for-postgres.sh localhost && "\
 	"echo \"SELECT 'CREATE DATABASE $(POSTGRES_DB)' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = "\
-	"'$(POSTGRES_DB)')\gexec\" | psql -U $(POSTGRES_USER)"
+	"'$(POSTGRES_DB)')\gexec\" | psql -U $(POSTGRES_USER) -d postgres"
+
+postgres_drop_db: # Удаление базы данных
+	docker compose $(DOCKER_COMPOSE) exec -it postgres bash -c "/etc/wait-for-postgres.sh localhost && "\
+	"echo \"SELECT 'DROP DATABASE $(POSTGRES_DB)' WHERE EXISTS (SELECT FROM pg_database WHERE datname = "\
+	"'$(POSTGRES_DB)')\gexec\" | psql -U $(POSTGRES_USER) -d postgres"
+
+# Populate Databases
+
+postgres_populate_db: # Заполнение базы данных
+	docker compose $(DOCKER_COMPOSE) run -it client python3 ./postgres/postgres_create.py
+
+mongo_populate_db: # Заполнение базы данных
+	docker compose $(DOCKER_COMPOSE) run -it client python3 ./mongo/mongo_create.py
 
 # Logs
 

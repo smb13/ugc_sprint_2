@@ -7,6 +7,8 @@ import uuid
 from collections.abc import Generator, Iterable
 from contextlib import contextmanager
 
+from tqdm import tqdm
+
 logger = logging.getLogger(__name__)
 
 
@@ -28,12 +30,15 @@ def data_generator(
     """Generates tuples of (user_id, film_id, rating, dt_created)"""
     scores = itertools.cycle(range(1, 11))
 
-    for user_id in user_ids:
+    # Ensure that max amount of films per user not exceeds amount of films
+    amount_by_user = (min(amount_by_user[0], len(film_ids)), min(amount_by_user[1], len(film_ids)))
+
+    for user_id in tqdm(user_ids):
         films_amount = random.randint(*amount_by_user)
-        for _ in range(films_amount):
+        for film_id in random.sample(film_ids, films_amount):
             dt_created = dt.datetime.now().replace(
                 year=random.randint(2010, 2020),
                 month=random.randint(1, 12),
                 day=random.randint(1, 28),
             )
-            yield str(user_id), str(random.choice(film_ids)), next(scores), dt_created
+            yield str(user_id), str(film_id), next(scores), dt_created

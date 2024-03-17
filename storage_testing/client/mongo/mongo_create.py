@@ -30,9 +30,9 @@ def save_data_to_mongo(
 
 def generate_test_data(
     mongo_db: Database,
-    users_amount: int = 100000,
+    users_amount: int = 100_000,
     films_amount: int = 1000,
-    batch_size: int = 10000,
+    batch_size: int = 10_000,
     likes_per_user: tuple[int, int] = (0, 50),
     bookmarks_per_user: tuple[int, int] = (0, 20),
 ) -> None:
@@ -68,6 +68,9 @@ def main() -> None:
     with mongo_client_context(host=mongo_settings.host, port=mongo_settings.port) as client:
         client: MongoClient
         mongo_db: Database = client["ugc"]
+
+        mongo_db.drop_collection("likes")
+        mongo_db.drop_collection("bookmarks")
 
         mongo_db.likes.create_index("user_id")
         mongo_db.likes.create_index("film_id")
