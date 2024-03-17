@@ -1,5 +1,5 @@
 from collections.abc import Generator
-from typing import Any
+from typing import Any, List, Tuple, Dict
 
 from pydantic import TypeAdapter
 from store import models
@@ -10,8 +10,8 @@ from utils.decorator import get_value_from_generator
 
 class DataTransform:
     @get_value_from_generator
-    def run(self, next_node: Generator) -> Generator[None, list[tuple[str, dict[Any, Any]]], None]:
-        while data_batch := (yield):
+    def run(self, next_node: Generator) -> Generator[None, List[Tuple[str, Dict[Any, Any]]], None]:
+        while data_batch := (yield):  # type: ignore
             transformed_batch = []
             for topic, value in data_batch:
                 logger.info("Data transformation before loading")
