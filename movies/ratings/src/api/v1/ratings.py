@@ -14,7 +14,7 @@ router = APIRouter(redirect_slashes=False)
 @router.post(
     path="/{movie_id}/like",
     summary="Добавление лайка фильму",
-    status_code=HTTPStatus.CREATED,
+    status_code=HTTPStatus.OK,
     dependencies=[Depends(HTTPBearer())],
 )
 async def like_movie(
@@ -27,7 +27,7 @@ async def like_movie(
 @router.post(
     path="/{movie_id}/dislike",
     summary="Добавление дизлайка фильму",
-    status_code=HTTPStatus.CREATED,
+    status_code=HTTPStatus.OK,
     dependencies=[Depends(HTTPBearer())],
 )
 async def dislike_movie(
@@ -40,7 +40,7 @@ async def dislike_movie(
 @router.post(
     path="/{movie_id}/{rating}",
     summary="Добавление рейтинга фильму",
-    status_code=HTTPStatus.CREATED,
+    status_code=HTTPStatus.OK,
     dependencies=[Depends(HTTPBearer())],
 )
 async def set_rating(
@@ -54,7 +54,7 @@ async def set_rating(
 @router.delete(
     path="/{movie_id}/",
     summary="Удаление рейтинга фильму",
-    status_code=HTTPStatus.CREATED,
+    status_code=HTTPStatus.OK,
     dependencies=[Depends(HTTPBearer())],
 )
 async def remove_rating(

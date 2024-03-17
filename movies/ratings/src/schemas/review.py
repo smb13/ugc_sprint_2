@@ -18,6 +18,7 @@ class ReviewRequest(BaseModel):
 
 class ReviewResponse(ReviewRequest):
     """Количество лайков у рецензии"""
+    review_id: str|None = Field(default=None, description="Идентификатор отзыва", example='65f75b90463e3c418e6bec02')
     likes: int | None = Field(0, description="Количества лайков у фильма", example=1)
     dislikes: int | None = Field(0, description="Количества дизлайков у фильма", example=123)
     average: float | None = Field(0, description="Средняя пользовательская оценка фильма", example=2.3)

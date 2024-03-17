@@ -201,7 +201,7 @@ stop:
 
 stop_dev:
 	docker compose $(DOCKER_COMPOSE_DEV) --profile production --profile external_dev \
-	--profile admin_dev --profile tests  stop
+	--profile admin_dev --profile tests --profile auth_dev  stop
 
 down:
 	docker compose $(DOCKER_COMPOSE_PROD) down --remove-orphans

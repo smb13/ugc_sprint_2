@@ -29,7 +29,7 @@ async def add_review(
 @router.delete(
     path="/{movie_id}",
     summary="Удаление рецензии на фильм",
-    status_code=HTTPStatus.CREATED,
+    status_code=HTTPStatus.OK,
     dependencies=[Depends(HTTPBearer())],
 )
 async def remove_review(
@@ -69,7 +69,7 @@ async def like_review(
 @router.post(
     path="/{movie_id}/{review_id}/dislike",
     summary="Добавление дизлайка к рецензии на фильм",
-    status_code=HTTPStatus.CREATED,
+    status_code=HTTPStatus.OK,
     dependencies=[Depends(HTTPBearer())],
 )
 async def dislike_movie(
@@ -83,7 +83,7 @@ async def dislike_movie(
 @router.delete(
     path="/{movie_id}/{review_id}",
     summary="Удаление оценки к рецензии на фильм",
-    status_code=HTTPStatus.CREATED,
+    status_code=HTTPStatus.OK,
     dependencies=[Depends(HTTPBearer())],
 )
 async def dislike_movie(

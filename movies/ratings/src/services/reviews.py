@@ -26,11 +26,17 @@ class ReviewService(BaseService):
         }, {'$set': {'review': review}}, upsert=True)
 
     async def remove_review(self, movie_id: UUID) -> None:
-        self.db_review().delete_one({
-            'movie_id': bson.Binary.from_uuid(movie_id),
-            'user_id': (await self.jwt.get_raw_jwt())['sub']
-        })
-        # TODO: Удалить лайки.
+        a = await self.get_review(movie_id)
+        # a = self.db_review().delete_one({
+        #     'movie_id': bson.Binary.from_uuid(movie_id),
+        #     'user_id': (await self.jwt.get_raw_jwt())['sub']
+        # })
+        print(a)
+        # self.db_review_ratings().delete_many({
+        #     'movie_id': bson.Binary.from_uuid(movie_id),
+        #     'user_id': (await self.jwt.get_raw_jwt())['sub'],
+        #     'review_id': bson.ObjectId(review_id)
+        # })
 
     async def get_review(self, movie_id: UUID) -> ReviewResponse:
         result = await self.__get_review_list(
@@ -85,7 +91,7 @@ class ReviewService(BaseService):
                     "as": "review_data",
                     "pipeline": [{
                         "$group": {
-                            "_id": None,
+                            "_id": '$id',
                             "likes": {"$sum": {"$cond": [{"$eq": ["$rating", 10]}, 1, 0]}},
                             "dislikes": {"$sum": {"$cond": [{"$eq": ["$rating", 1]}, 1, 0]}},
                             "average": {"$avg": "$rating"}}}, {
@@ -94,6 +100,7 @@ class ReviewService(BaseService):
             {
                 "$project": {
                     "_id": 0,
+                    "review_id": {"$toString": "$_id"},
                     "movie_id": 1,
                     "user_id": 1,
                     "review": 1,
@@ -101,7 +108,7 @@ class ReviewService(BaseService):
             },
             {
                 "$project": {
-                    "_id": 0,
+                    "review_id": 1,
                     "movie_id": 1,
                     "user_id": 1,
                     "review": 1,
