@@ -74,8 +74,6 @@ class ReviewService(BaseService):
             limit=page_size
         ))
 
-    ReviewListResponse.total
-
     async def __get_review_list(self, match_stage=None, sort_stage=None, skip=None, limit=None) -> ReviewListResponse:
         return ReviewListResponse(**self.db_review().aggregate(list(filter(None, [
             match_stage,
