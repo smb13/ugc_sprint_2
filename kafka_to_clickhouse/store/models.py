@@ -1,18 +1,18 @@
 import datetime as dt
 import json
 import uuid
-from typing import Any
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, field_serializer
 
 
 class Event(BaseModel):
-    user_id: str | None
+    user_id: Optional[str]
     timestamp: dt.datetime
-    value: dict[str, Any] | None
+    value: Optional[Dict[str, Any]]
 
     @field_serializer("value")
-    def serialize_value(self, value: dict[str, Any]) -> str:
+    def serialize_value(self, value: Dict[str, Any]) -> str:
         return json.dumps(value)
 
     @field_serializer("timestamp")

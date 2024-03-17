@@ -1,3 +1,5 @@
+from typing import Optional
+
 from clickhouse_driver import connect
 from clickhouse_driver.dbapi.connection import Connection
 from clickhouse_driver.dbapi.cursor import Cursor
@@ -11,8 +13,8 @@ class ClickhouseAccessor(BaseAccessor):
     """Clickhouse ацессор - контекстный менеджер подключения к БД."""
 
     def __init__(self):
-        self.connection: Connection | None = None
-        self.cursor: Cursor | None = None
+        self.connection: Optional[Connection] = None
+        self.cursor: Optional[Cursor] = None
 
     def __enter__(self):
         try:
