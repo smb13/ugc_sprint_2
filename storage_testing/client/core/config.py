@@ -18,8 +18,6 @@ class DatasetSettings(BaseSettings):
 class MongoSettings(BaseSettings):
     host: str = Field("mongo")
     port: int = Field(27017)
-    user: str | None = None
-    password: str | None = None
 
     model_config = SettingsConfigDict(env_prefix="mongo_", env_file=".env")
 

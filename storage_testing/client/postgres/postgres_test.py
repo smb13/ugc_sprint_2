@@ -21,7 +21,7 @@ DSN = (
 def get_user_ids(conn: connection, users_amount: int) -> list[int]:
     with conn.cursor() as cur:
         cur: cursor
-        # Тестируем скорость чтения
+
         cur.execute(
             """
             SELECT DISTINCT user_id FROM likes LIMIT %s;
@@ -36,7 +36,7 @@ def get_user_ids(conn: connection, users_amount: int) -> list[int]:
 def get_film_ids(conn: connection, films_amount: int) -> list[int]:
     with conn.cursor() as cur:
         cur: cursor
-        # Тестируем скорость чтения
+
         cur.execute(
             """
             SELECT DISTINCT film_id FROM likes LIMIT %s;
@@ -48,9 +48,11 @@ def get_film_ids(conn: connection, films_amount: int) -> list[int]:
     return [u[0] for u in rows]
 
 
-def fetch_users_likes(conn: connection, user_ids: int) -> None:
+def fetch_users_likes(conn: connection, user_ids: list[int]) -> None:
     """Списки понравившихся пользователям фильмов (списки лайков пользователей)."""
     with conn.cursor() as cur:
+        cur: cursor
+
         for user_id in user_ids:
             cur.execute(
                 """
@@ -61,12 +63,14 @@ def fetch_users_likes(conn: connection, user_ids: int) -> None:
             cur.fetchall()
 
 
-def insert_user_like(conn: connection, user_ids: int) -> None:
+def insert_user_like(conn: connection, user_ids: list[int]) -> None:
     """Добавление оценки пользователя"""
     film_id = str(uuid.uuid4())
 
     for user_id in user_ids:
         with conn.cursor() as cur:
+            cur: cursor
+
             cur.execute(
                 """
                 INSERT INTO likes VALUES (%s, %s, %s, now());
@@ -75,12 +79,14 @@ def insert_user_like(conn: connection, user_ids: int) -> None:
             )
 
 
-def insert_and_fetch_user_like(conn: connection, user_ids: int) -> None:
+def insert_and_fetch_user_like(conn: connection, user_ids: list[int]) -> None:
     """Добавление оценки пользователя и получение оценок этого пользователя"""
     film_id = str(uuid.uuid4())
 
     for user_id in user_ids:
         with conn.cursor() as cur:
+            cur: cursor
+
             cur.execute(
                 """
                 INSERT INTO likes VALUES (%s, %s, %s, now());
@@ -98,7 +104,7 @@ def insert_and_fetch_user_like(conn: connection, user_ids: int) -> None:
             cur.fetchall()
 
 
-def fetch_film_ratings(conn: connection, film_ids: int) -> None:
+def fetch_film_ratings(conn: connection, film_ids: list[int]) -> None:
     """Средняя пользовательская оценка фильма."""
     with conn.cursor() as cur:
         for film_id in film_ids:
@@ -111,7 +117,7 @@ def fetch_film_ratings(conn: connection, film_ids: int) -> None:
             cur.fetchone()
 
 
-def insert_likes_and_fetch_film_rating(conn: connection, film_ids: int) -> None:
+def insert_likes_and_fetch_film_rating(conn: connection, film_ids: list[int]) -> None:
     """Добавление оценки пользователя и получение оценок этого пользователя"""
     for film_id in film_ids:
         with conn.cursor() as cur:
@@ -163,7 +169,7 @@ def main() -> None:
             insert_and_fetch_user_like(conn, user_ids)
 
         # Добавление оценки пользователя и получение оценок этого пользователя
-        film_ids = get_film_ids(conn, films_amount / 10) * 10
+        film_ids = get_film_ids(conn, int(films_amount / 10)) * 10
         with log_time("Postgres writes user like and returns films rating", len(film_ids)):
             insert_likes_and_fetch_film_rating(conn, film_ids)
 

@@ -1,11 +1,9 @@
 """Генерация тестовых данных"""
 
-import datetime as dt
 import itertools
 import logging
-import random
 import uuid
-from collections.abc import Generator, Iterable
+from collections.abc import Iterable
 from contextlib import closing
 
 import psycopg2
@@ -13,7 +11,7 @@ from psycopg2 import sql
 from psycopg2.extensions import connection, cursor
 from psycopg2.extras import LoggingConnection, execute_batch
 
-from core.common import log_time
+from core.common import data_generator, log_time
 from core.config import postgres_settings
 
 logger = logging.getLogger(__name__)
@@ -70,25 +68,6 @@ def create_db_and_tables(conn: connection) -> None:
         )
 
         logging.info("DB creation finished")
-
-
-def data_generator(
-    user_ids: Iterable[uuid.UUID],
-    film_ids: list[uuid.UUID],
-    amount_by_user: tuple[int, int],
-) -> Generator[tuple[str, str, int, dt.datetime], None, None]:
-    """Generates tuples of (user_id, film_id, rating, dt_created)"""
-    scores = itertools.cycle(range(1, 11))
-
-    for user_id in user_ids:
-        films_amount = random.randint(*amount_by_user)
-        for _ in range(films_amount):
-            dt_created = dt.datetime.now().replace(
-                year=random.randint(2010, 2020),
-                month=random.randint(1, 12),
-                day=random.randint(1, 28),
-            )
-            yield str(user_id), str(random.choice(film_ids)), next(scores), dt_created
 
 
 def save_data_to_postgres(
