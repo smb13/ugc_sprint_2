@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List, Union
 
 from confluent_kafka import Consumer
 from store.base import BaseAccessor
@@ -19,10 +19,10 @@ class KafkaAccessor(BaseAccessor):
         self.consumer: Consumer = Consumer(configure_consumer)
         self.__subscribe(settings.kafka.topic_subscribe)
 
-    def __subscribe(self, topic: list[str]) -> None:
+    def __subscribe(self, topic: List[str]) -> None:
         self.consumer.subscribe(topic)
 
-    def __enter__(self) -> Consumer | Exception:
+    def __enter__(self) -> Union[Consumer, Exception]:
         try:
             return self.consumer
         except ConnectionError as c_e:

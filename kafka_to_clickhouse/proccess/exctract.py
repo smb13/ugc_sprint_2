@@ -1,5 +1,6 @@
 import json
 from collections.abc import Generator
+from typing import Any, Tuple, Dict
 
 import backoff
 from confluent_kafka import Consumer
@@ -12,7 +13,7 @@ from utils.decorator import get_value_from_generator
 class KafkaExtractor:
     @get_value_from_generator
     @backoff.on_exception(backoff.expo, Exception, logger=logger, max_tries=settings.project.backoff_max_tries)
-    def run(self, next_node: Generator) -> Generator[None, tuple[Consumer, str, dict], None]:
+    def run(self, next_node: Generator) -> Generator[None, Tuple[Consumer, str, Dict[Any, Any]], None]:
         messages_batch = []
 
         while True:
@@ -40,7 +41,7 @@ class KafkaExtractor:
                 }
 
                 if film_id:
-                    event_data |= {"film_id": film_id}
+                    event_data = {**event_data, "film_id": film_id}
 
                 messages_batch.append((topic, event_data))
 

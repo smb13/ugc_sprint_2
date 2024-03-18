@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass, field
+from typing import List
 
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -18,7 +19,7 @@ class LogSettings(BaseSettings):
     # используем extra: ignore чтобы пропускать другие незаданные значения
     model_config = SettingsConfigDict(env_file=ENV_PATH, env_file_encoding="utf-8", extra="ignore")
     log_level: int = Field(default=30)
-    log_format: str = "%(asctime)s [%(levelname).1s]: [in %(filename)s: line %(lineno)d] - %(message)s"
+    log_format: str = '%(asctime)s [%(levelname)s] [in %(filename)s: line %(lineno)d] - "%(message)s"'
 
 
 class ClickhouseSettings(BaseSettings):
@@ -28,12 +29,12 @@ class ClickhouseSettings(BaseSettings):
         env_file=ENV_PATH,
         env_file_encoding="utf-8",
     )
-    host: str = ...
+    host: str = Field(default="")
     port: int = Field(default=9000)
     database: str = Field(default="")
     user: str = Field(default="default")
     password: str = Field(default="")
-    alt_hosts: str = ...
+    alt_hosts: str = Field(default="")
 
 
 class KafkaSettings(BaseSettings):
@@ -45,7 +46,7 @@ class KafkaSettings(BaseSettings):
     )
     bootstrap_servers: str = Field(default="localhost:9094")
     request_timeout: int = Field(default=30)
-    topic_subscribe: list[str] = Field(default=["user", "film"])
+    topic_subscribe: List[str] = Field(default=["user", "film"])
 
 
 @dataclass
