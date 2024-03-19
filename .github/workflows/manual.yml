@@ -65,6 +65,7 @@ jobs:
           echo JWT_ACCESS_TOKEN_EXPIRES_MINUTES=${{ secrets.JWT_ACCESS_TOKEN_EXPIRES_MINUTES }} >> .env
           echo JWT_ACCESS_TOKEN_SECRET_KEY=${{ secrets.JWT_ACCESS_TOKEN_SECRET_KEY }} >> .env
           echo JWT_REFRESH_TOKEN_SECRET_KEY=${{ secrets.JWT_REFRESH_TOKEN_SECRET_KEY }} >> .env
+          echo ELASTIC_PORT=${{ secrets.ELASTIC_PORT }} >> .env
 
     -   name: Run tests
         run: |
