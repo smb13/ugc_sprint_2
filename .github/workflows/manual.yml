@@ -71,17 +71,3 @@ jobs:
         run: |
           cd movies
           make first_start_tests
-
-  notify:
-    if: success()
-    needs: [lint-and-type-check, tests]
-    runs-on: ubuntu-latest
-    steps:
-    -   uses: actions/checkout@v2
-
-    -   name: Send success notification to Telegram
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: 'CI Pipeline Success: ${{ github.repository }} at ${{ github.sha }}'
