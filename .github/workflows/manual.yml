@@ -3,8 +3,8 @@ name: Manual CI
 
 on  :
   workflow_dispatch:
-    branches:
-    -   main
+    # branches:
+    # -   main
 
 jobs:
   lint-and-type-check:
