@@ -8,6 +8,7 @@ class Message(BaseModel):
     """
     Сообщение для Kafka
     """
+
     # Топик
     topic: Annotated[str, IsNotNan, MinLen(1)]
     # Временная метка

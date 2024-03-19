@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from elasticsearch import NotFoundError
-from opentelemetry import trace
+from opentelemetry.trace import get_tracer
 
 from core.types import DataOptType, ModelType, NestedQuery, PageNumberType, PageSizeType, RequestData
 
@@ -27,7 +27,7 @@ class BaseDatabase(ABC):
         """Получить данные из базы данных"""
 
 
-tracer = trace.get_tracer(__name__)
+tracer = get_tracer(__name__)
 
 
 class ElasticDatabase(BaseDatabase):

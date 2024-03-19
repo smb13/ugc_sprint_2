@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import BaseBackend
 from django.core.exceptions import PermissionDenied
 from django.core.handlers.wsgi import WSGIRequest
+from django.db.migrations.operations.base import Operation
 
 import jwt
 import requests
@@ -44,16 +45,26 @@ class CustomBackend(BaseBackend):
         return None
 
     @staticmethod
-    def __decode_access_token(access_token: str) -> dict | None:
+    def __decode_access_token(access_token: str | None) -> dict | None:
         """
         Декодирует токен и извлекает из него информацию по пользователю.
         """
+        if access_token:
+            try:
+                return jwt.decode(access_token, key=settings.JWT_ACCESS_TOKEN_SECRET_KEY, algorithms=["HS256"])
+            except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+                return None
+        return None
+
+    @staticmethod
+    def get_user(user_id: uuid.UUID) -> Operation | None:
+        """Переопределение функции получения пользователя."""
         try:
-            return jwt.decode(access_token, key=settings.JWT_ACCESS_TOKEN_SECRET_KEY, algorithms=["HS256"])
-        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+            return User.objects.get(pk=user_id)
+        except User.DoesNotExist:
             return None
 
-    def authenticate(self, request: WSGIRequest, username: str = None, password: str = None) -> User | None:
+    def authenticate(self, request: WSGIRequest, username: str = None, password: str = None) -> Operation | None:
         """
         Аутентифицирует пользователя и создает его в Django, если его нет в БД.
         """
@@ -84,26 +95,23 @@ class CustomBackend(BaseBackend):
             resp_status=http.HTTPStatus.OK,
             headers={"Authorization": f"Bearer {access_token}"},
         )
+        if user_info:
+            try:
+                user, _ = User.objects.get_or_create(id=user_info.get("id"))
+                user.login = user_info.get("login")
+                user.first_name = user_info.get("first_name")
+                user.last_name = user_info.get("last_name")
+                if payload:
+                    roles = payload.get("roles")
+                    if roles:
+                        user.is_admin = "admin" in roles
+                else:
+                    user.is_admin = False
+                user.is_active = True
+                user.save()
+            except Exception as exc:
+                logging.exception(f"Except {repr(exc)}")
 
-        try:
-            user, _ = User.objects.get_or_create(id=user_info.get("id"))
-            user.login = user_info.get("login")
-            user.first_name = user_info.get("first_name")
-            user.last_name = user_info.get("last_name")
-            user.is_admin = "admin" in payload.get("roles")
-            user.is_active = True
-            user.save()
-        except Exception as exc:
-            logging.exception(f"Except {repr(exc)}")
-
-            return None
+                return None
 
         return user
-
-    @staticmethod
-    def get_user(user_id: uuid.UUID) -> User | None:
-        """Переопределение функции получения пользователя."""
-        try:
-            return User.objects.get(pk=user_id)
-        except User.DoesNotExist:
-            return None

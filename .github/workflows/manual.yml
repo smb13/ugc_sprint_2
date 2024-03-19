@@ -1,8 +1,8 @@
 ---
-name: Pull request CI
+name: Manual CI
 
 on  :
-  pull_request:
+  workflow_dispatch:
     branches:
     -   main
 

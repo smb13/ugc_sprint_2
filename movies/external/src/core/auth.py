@@ -24,7 +24,7 @@ class JWTTokenPayload(BaseModel):
     exp: int
 
     jti: str | None = None
-    roles: list[str] = ()
+    roles: list[str] = []
 
     @property
     def expires_at(self) -> dt.datetime:
@@ -45,7 +45,7 @@ class JWTTokenPayload(BaseModel):
         return uuid.UUID(self.jti)
 
 
-def decode_token(token: str) -> JWTTokenPayload | None:
+async def decode_token(token: str) -> JWTTokenPayload | None:
     try:
         decoded_token = jwt.decode(token, settings.jwt_access_token_secret_key, algorithms=["HS256"])
         return JWTTokenPayload.model_validate(decoded_token) if decoded_token["exp"] >= tm.time() else None
@@ -63,8 +63,10 @@ def check_permissions(*required_roles: SystemRolesEnum) -> Callable:
 
     async def dependency(
         credentials: HTTPAuthorizationCredentials | None = Depends(security_jwt),
-    ) -> JWTTokenPayload:
-        token: JWTTokenPayload = decode_token(credentials.credentials) if credentials else None
+    ) -> JWTTokenPayload | None:
+        token: JWTTokenPayload | None
+
+        token = await decode_token(credentials.credentials) if credentials else None
 
         if required_roles and (not token or not {role.value for role in required_roles} <= set(token.roles)):
             raise HTTPException(status_code=http.HTTPStatus.FORBIDDEN, detail="Forbidden")
