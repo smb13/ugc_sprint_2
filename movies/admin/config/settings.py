@@ -6,10 +6,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
-import logging
 
 import sentry_sdk
-from sentry_sdk.integrations.logging import LoggingIntegration
+from sentry_sdk.integrations.django import DjangoIntegration
 
 import environ
 from split_settings.tools import include
@@ -22,16 +21,14 @@ env = environ.Env(
 # Инициализация Sentry SDK если есть env SENTRY_DSN
 if SENTRY_DSN := os.getenv("SENTRY_DSN"):
 
-    sentry_logging = LoggingIntegration(
-        level=logging.WARNING,  # Захват логов уровня WARNING и выше
-        event_level=logging.ERROR  # Отправка событий в Sentry начиная с уровня ERROR
-    )
-
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[sentry_logging],
-        traces_sample_rate=1.0,
-        profiles_sample_rate=1.0,
+        enable_tracing=True,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=env("TRACES_SAMPLE_RATE", cast=float, default=0.01),
+        profiles_sample_rate=env("PROFILES_SAMPLE_RATE", cast=float, default=0.01),
+        attach_stacktrace=True,
+        send_default_pii=True,
     )
 
 environ.Env.read_env(".env")
