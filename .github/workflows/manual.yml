@@ -1,10 +1,8 @@
 ---
-name: Pull request CI
+name: Manual CI
 
 on  :
-  pull_request:
-    branches:
-    -   main
+  workflow_dispatch:
 
 jobs:
   lint-and-type-check:
@@ -67,22 +65,9 @@ jobs:
           echo JWT_ACCESS_TOKEN_EXPIRES_MINUTES=${{ secrets.JWT_ACCESS_TOKEN_EXPIRES_MINUTES }} >> .env
           echo JWT_ACCESS_TOKEN_SECRET_KEY=${{ secrets.JWT_ACCESS_TOKEN_SECRET_KEY }} >> .env
           echo JWT_REFRESH_TOKEN_SECRET_KEY=${{ secrets.JWT_REFRESH_TOKEN_SECRET_KEY }} >> .env
+          echo ELASTIC_PORT=${{ secrets.ELASTIC_PORT }} >> .env
 
     -   name: Run tests
         run: |
           cd movies
           make first_start_tests
-
-  notify:
-    if: success()
-    needs: [lint-and-type-check, tests]
-    runs-on: ubuntu-latest
-    steps:
-    -   uses: actions/checkout@v2
-
-    -   name: Send success notification to Telegram
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: 'CI Pipeline Success: ${{ github.repository }} at ${{ github.sha }}'

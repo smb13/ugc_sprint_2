@@ -1,13 +1,24 @@
 from http import HTTPStatus
+from uuid import uuid4
+
+from async_fastapi_jwt_auth import AuthJWT
 
 import aiohttp
 import pytest_asyncio
-from settings import test_settings
+from settings import test_settings, authjwt_settings
+
+
+@AuthJWT.load_config
+def get_config():
+    return authjwt_settings
 
 
 @pytest_asyncio.fixture(scope="session")
 async def session():
-    async with aiohttp.ClientSession() as session:
+    jwt = AuthJWT()
+    access_token = await jwt.create_access_token(subject=str(uuid4()),
+                                                 user_claims={"sub": "username:user@yandex.ru", "roles": ["user"]})
+    async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {access_token}"}) as session:
         yield session
 
 

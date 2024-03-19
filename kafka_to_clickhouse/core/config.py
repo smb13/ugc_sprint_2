@@ -19,7 +19,7 @@ class LogSettings(BaseSettings):
     # используем extra: ignore чтобы пропускать другие незаданные значения
     model_config = SettingsConfigDict(env_file=ENV_PATH, env_file_encoding="utf-8", extra="ignore")
     log_level: int = Field(default=30)
-    log_format: str = "%(asctime)s [%(levelname).1s]: [in %(filename)s: line %(lineno)d] - %(message)s"
+    log_format: str = '%(asctime)s [%(levelname)s] [in %(filename)s: line %(lineno)d] - "%(message)s"'
 
 
 class ClickhouseSettings(BaseSettings):

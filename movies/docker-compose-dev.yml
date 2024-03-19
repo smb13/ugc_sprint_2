@@ -19,7 +19,7 @@ services:
     environment:
       DEBUG: true
     ports:
-    -   8888:8000
+    - "8888:8000"
     volumes:
     -   ./external/src:/src
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
@@ -42,7 +42,7 @@ services:
       postgres:
         condition: service_healthy
     ports:
-    -   8000:8000
+    - "8000:8000"
     volumes:
     -   ./auth/src:/src
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
@@ -71,7 +71,7 @@ services:
       DEBUG: true
       SERVICE_AUTH_API_BASE_PATH: http://auth_dev:8000/api/v1
     ports:
-    -   8080:8000    # Торчит наружу только при запущенном dev-сервере, на проде торчать не будет
+    - "8080:8000"    # Торчит наружу только при запущенном dev-сервере, на проде торчать не будет
     volumes:
     -   ./admin:/src/app
     -   admin_data:/src/app/data
@@ -96,7 +96,7 @@ services:
       file: docker-compose.yml
       service: postgres
     ports:
-    -   5432:5432
+    - "5432:5432"
     profiles: [etl, admin_dev, auth_dev]
 
   elastic:
@@ -128,29 +128,29 @@ services:
     image: mongo
     command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/config1:/data/db
+    -   /etc/localtime:/etc/localtime:ro
+    -   /tmp/mongo_cluster/config1:/data/db
 
   mongors1n1:
     container_name: mongors1n1
     image: mongo
     command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/data1:/data/db
+    -   /etc/localtime:/etc/localtime:ro
+    -   /tmp/mongo_cluster/data1:/data/db
 
   mongos1:
     container_name: mongos1
     image: mongo
     depends_on:
-      - mongocfg1
+    -   mongocfg1
     command: mongos --configdb mongors1conf/mongocfg1:27017 --port 27017 --bind_ip_all
     ports:
-      - 27017:27017
+    - "27017:27017"
     expose:
-      - "27017"
+    -   "27017"
     volumes:
-      - /etc/localtime:/etc/localtime:ro
+    -   /etc/localtime:/etc/localtime:ro
 
 
 volumes :

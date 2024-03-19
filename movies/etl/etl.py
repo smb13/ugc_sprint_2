@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
     backoff.expo,
     (ElasticConnectionError, psycopg2.OperationalError, RedisConnectionError),
     max_time=60,
-)
+)  # type: ignore
 def etl_data(
     postgres_dsn: dict[str, Any],
     redis_dsn: dict[str, Any],
@@ -50,7 +50,7 @@ def etl_data(
                 }
                 for etl_class in (MoviesETL, GenresETL, PersonsETL, FilmPersonsETL):
                     with suppress(ElasticError):
-                        etl_class(**etl_params).etl()
+                        etl_class(**etl_params).etl()  # type: ignore
 
     except LockError:
         logger.warning('Unable to acquire lock "etl_movies"')

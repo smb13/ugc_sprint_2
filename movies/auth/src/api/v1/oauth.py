@@ -5,7 +5,7 @@ from starlette.responses import RedirectResponse
 from core.config import settings
 from schemas.auth import TokenResponse
 from services.providers.google import GoogleProvider
-from services.providers.yandex import YandexProvider
+from services.providers.yandex import YA_ACCESS_TKN_URL, YA_API_BASE_URL, YA_AUTHORIZE_URL, YandexProvider
 
 router = APIRouter()
 
@@ -16,11 +16,11 @@ oauth.register(
     name="yandex",
     client_id=settings.yandex_client_id,
     client_secret=settings.yandex_client_secret,
-    access_token_url="https://oauth.yandex.ru/token",
+    access_token_url=YA_ACCESS_TKN_URL,
     access_token_params=None,
-    authorize_url="https://oauth.yandex.ru/authorize",
+    authorize_url=YA_AUTHORIZE_URL,
     authorize_params=None,
-    api_base_url="https://login.yandex.ru/",
+    api_base_url=YA_API_BASE_URL,
     client_kwargs={
         "scope": "login:email login:info login:avatar",
         "force_confirm": "yes",

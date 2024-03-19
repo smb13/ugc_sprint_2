@@ -6,7 +6,7 @@ from django.db import models
 
 
 class MyUserManager(BaseUserManager):
-    def create_user(self, login, password=None):
+    def create_user(self, login: str, password: str = None) -> AbstractBaseUser:
         if not login:
             raise ValueError("Users must have an email address")
 
@@ -15,7 +15,7 @@ class MyUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, login, password=None):
+    def create_superuser(self, login: str, password: str = None) -> AbstractBaseUser:
         user = self.create_user(login, password=password)
         user.is_admin = True
         user.save(using=self._db)
@@ -23,6 +23,8 @@ class MyUserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
+    USERNAME_FIELD = "login"
+
     id: uuid.UUID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     login: str = models.EmailField(verbose_name="email address", max_length=255, unique=True)
     is_active: bool = models.BooleanField(default=True)
@@ -30,19 +32,17 @@ class User(AbstractBaseUser):
     first_name: str = models.CharField(max_length=255)
     last_name: str = models.CharField(max_length=255)
 
-    USERNAME_FIELD = "login"
-
     objects = MyUserManager()
 
-    @property
-    def is_staff(self):
-        return self.is_admin
-
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.login} {self.id}"
 
-    def has_perm(self, perm, obj=None):
+    @property
+    def is_staff(self) -> bool:
+        return self.is_admin
+
+    def has_perm(self, perm: str, obj: object | None = None) -> bool:
         return True
 
-    def has_module_perms(self, app_label):
+    def has_module_perms(self, app_label: str) -> bool:
         return True

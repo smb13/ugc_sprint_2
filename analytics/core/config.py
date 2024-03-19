@@ -11,7 +11,7 @@ logging_config.dictConfig(LOGGING)
 
 class ProjectSettings(BaseSettings):
     name: str = Field(default="Analytics Service")
-    authjwt_secret_key: str
+    authjwt_secret_key: str = Field(default="secret")
     authjwt_algorithm: str = Field(default="HS256")
 
     model_config = SettingsConfigDict(env_prefix="project_", env_file=".env", extra="ignore")
