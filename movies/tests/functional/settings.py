@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic import BaseModel
 
 
 class TestSettings(BaseSettings):
@@ -17,5 +18,13 @@ class TestSettings(BaseSettings):
     page_size: int = 10
     page_size_max: int = 100
 
+    # JWT настройки
+    jwt_access_token_secret_key: str = "movies_token_secret"
+
+
+class AuthJWTSettings(BaseModel):
+    authjwt_secret_key: str = "movies_token_secret"
+
 
 test_settings = TestSettings()
+authjwt_settings = AuthJWTSettings(authjwt_secret_key=test_settings.jwt_access_token_secret_key)

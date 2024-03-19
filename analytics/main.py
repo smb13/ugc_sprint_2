@@ -1,5 +1,6 @@
 import logging
 from contextlib import asynccontextmanager
+from typing import Any
 
 import uvicorn
 from aiokafka import AIOKafkaProducer
@@ -17,7 +18,7 @@ from db import kafka
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI):
+async def lifespan(_: FastAPI) -> Any:
     # Создаем подключение к базам при старте сервера.
     kafka.producer = AIOKafkaProducer(bootstrap_servers=kafka_settings.connection_string)
 

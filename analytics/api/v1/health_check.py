@@ -3,7 +3,7 @@ from http import HTTPStatus
 from fastapi import APIRouter
 
 from schemas.error import HttpExceptionModel
-from schemas.event import CreateEventResponse, HealthCheckResponse
+from schemas.event import HealthCheckResponse
 
 router = APIRouter(redirect_slashes=False, prefix="", tags=["Health check"])
 

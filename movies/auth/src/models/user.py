@@ -29,7 +29,6 @@ class User(Base):
 
     role_bindings: Mapped[list["RoleBinding"]] = relationship(back_populates="user")
     refresh_tokens: Mapped[list["RefreshToken"]] = relationship(back_populates="user")
-    access_log: Mapped[list["AccessLogEntry"]] = relationship(back_populates="user")
 
     def __init__(self, login: str, password: str, first_name: str, last_name: str) -> None:
         self.login = login
@@ -37,14 +36,16 @@ class User(Base):
         self.first_name = first_name
         self.last_name = last_name
 
+    access_log: Mapped[list["AccessLogEntry"]] = relationship(back_populates="user")
+
     def set_password(self, password: str) -> None:
         self.password = ph.hash(password)
 
     def check_password(self, password: str) -> bool:
         return ph.verify(self.password, password)
 
-    def need_rehash(self) -> bool:
-        return ph.check_needs_rehash(self.password)
-
     def __repr__(self) -> str:
         return f"<User username={self.login!r}, first_name={self.first_name!r}, last_name={self.last_name!r}>"
+
+    def need_rehash(self) -> bool:
+        return ph.check_needs_rehash(self.password)

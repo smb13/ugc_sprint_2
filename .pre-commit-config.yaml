@@ -87,3 +87,9 @@ repos:
           flake8-raise, flake8-simplify, flake8-tidy-imports, flake8-type-checking, flake8-black, flake8-datetime-import, flake8-return]
         args: [--count, --statistics]
         language_version: python3.11
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.9.0
+    hooks:
+    -   id: mypy
+        types: [python]
+        args: [--config-file=./pyproject.toml]

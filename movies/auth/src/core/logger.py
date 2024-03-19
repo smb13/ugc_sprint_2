@@ -1,10 +1,36 @@
 import logging
 import sys
+import os
+
+import sentry_sdk
+from sentry_sdk.integrations.starlette import StarletteIntegration
+from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 log = logging.getLogger("authlib")
 log.addHandler(logging.StreamHandler(sys.stdout))
 log.setLevel(logging.DEBUG)
 
+# Инициализация Sentry SDK если есть env SENTRY_DSN
+if SENTRY_DSN := os.getenv("SENTRY_DSN"):
+
+    # Используем и FastApiIntegration и StarletteIntegration, тк они тесно связаны
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        enable_tracing=True,
+        environment=os.getenv("SENTRY_ENVIRONMENT"),  # Позволяет идентифицировать конкретный инстанс если их несколько
+        integrations=[
+            StarletteIntegration(
+                transaction_style="url"  # если `endpoint` - будет отображать название самого метода
+            ),
+            FastApiIntegration(
+                transaction_style="url"  # если `endpoint` - будет отображать название самого метода
+            ),
+        ],
+        traces_sample_rate=float(os.getenv("TRACES_SAMPLE_RATE", 0.01)),
+        profiles_sample_rate=float(os.getenv("PROFILES_SAMPLE_RATE", 0.01)),
+        attach_stacktrace=True,  # прикрепляет стек вызовов к логам для ошибок, не являющихся исключениями
+        send_default_pii=True,  # данные, позволяющие идентифицировать запись
+    )
 
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 LOG_DEFAULT_HANDLERS = ["console"]

@@ -16,7 +16,7 @@ class JWTTokenPayload(BaseModel):
     exp: int
 
     jti: str | None = None
-    roles: list[str] = ()
+    roles: list[str] = []
 
     @property
     def expires_at(self) -> dt.datetime:

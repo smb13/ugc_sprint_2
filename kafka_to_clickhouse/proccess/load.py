@@ -1,6 +1,6 @@
 from collections import defaultdict
 from collections.abc import Generator
-from typing import TypeVar
+from typing import TypeVar, List, Tuple, Dict, Any
 
 import backoff
 from pydantic import BaseModel
@@ -17,18 +17,16 @@ ModelsSchemas = TypeVar("ModelsSchemas", bound=models)
 class ClickhouseLoader:
     @get_value_from_generator
     @backoff.on_exception(backoff.expo, Exception, logger=logger, max_tries=settings.project.backoff_max_tries)
-    def run(self, click: ClickhouseAccessor) -> Generator[None, list[tuple[str, ModelsSchemas]], None]:
-        while data_batch := (yield):
-            write_batches = defaultdict(list)
+    def run(self, click: ClickhouseAccessor) -> Generator[None, List[Tuple[str, ModelsSchemas]], None]:
+        while data_batch := (yield):  # type: ignore
+            write_batches = defaultdict(List)
 
             for table_name, model_data in data_batch:
-                table_name: str
-                model_data: BaseModel
 
                 logger.info(f"Saving in table {table_name}")
 
                 # Prepare batch data for saving
-                dict_data_for_saving: dict = model_data.model_dump()
+                dict_data_for_saving: Dict[str, Any] = model_data.model_dump()
 
                 fields = ", ".join(dict_data_for_saving.keys())
 

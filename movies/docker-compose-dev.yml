@@ -19,7 +19,7 @@ services:
     environment:
       DEBUG: true
     ports:
-    -   "8888:8000"
+    - "8888:8000"
     volumes:
     -   ./external/src:/src
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
@@ -42,7 +42,7 @@ services:
       postgres:
         condition: service_healthy
     ports:
-    -   "8000:8000"
+    - "8000:8000"
     volumes:
     -   ./auth/src:/src
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
@@ -71,7 +71,7 @@ services:
       DEBUG: true
       SERVICE_AUTH_API_BASE_PATH: http://auth_dev:8000/api/v1
     ports:
-    -   "8080:8000"    # Торчит наружу только при запущенном dev-сервере, на проде торчать не будет
+    - "8080:8000"    # Торчит наружу только при запущенном dev-сервере, на проде торчать не будет
     volumes:
     -   ./admin:/src/app
     -   admin_data:/src/app/data
@@ -118,7 +118,7 @@ services:
       file: docker-compose-base.yml
       service: postgres
     ports:
-    -   "5432:5432"
+    - "5432:5432"
     profiles: [etl, admin_dev, auth_dev]
 
   elastic:
@@ -153,6 +153,7 @@ services:
     ports:
       - "27017:27017"
     profiles: [ ratings_dev, tests ]
+
 
 
 volumes :

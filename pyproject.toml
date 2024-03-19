@@ -60,16 +60,20 @@ error_summary = true
 pretty = false
 implicit_optional = true
 show_absolute_path = true
-#follow_imports = 'silent'
+#follow_imports = "silent"
 warn_redundant_casts = true
+explicit_package_bases = true
 
-disable_error_code = ["var-annotated"]
+disable_error_code = [
+    "var-annotated",
+    "import-untyped"
+]
+
 exclude = [
     "tests",
     "test",
     "migrations",
 ]
-#plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
 
 [[tool.mypy.overrides]]
 module = [

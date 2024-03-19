@@ -12,6 +12,7 @@ class UserEvent(BaseModel):
     """
     Пользовательское событие
     """
+
     timestamp: int = Field(
         ...,
         default_factory=get_now_in_ms,
@@ -36,6 +37,7 @@ class CreateEventResponse(BaseModel):
     """
     Ответ на создание события
     """
+
     event_sent: bool = Field(
         ...,
         description="Сообщение отправлено в кластер Kafka",
@@ -49,4 +51,5 @@ class HealthCheckResponse(BaseModel):
     """
     Статус работы
     """
+
     status: str
