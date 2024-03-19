@@ -1,8 +1,8 @@
 import os
-import logging
 
 import sentry_sdk
-from sentry_sdk.integrations.logging import LoggingIntegration
+from sentry_sdk.integrations.starlette import StarletteIntegration
+from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 # noinspection SpellCheckingInspection
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -11,16 +11,23 @@ LOG_DEFAULT_HANDLERS = ["console"]
 # Инициализация Sentry SDK если есть env SENTRY_DSN
 if SENTRY_DSN := os.getenv("SENTRY_DSN"):
 
-    sentry_logging = LoggingIntegration(
-        level=logging.WARNING,  # Захват логов уровня WARNING и выше
-        event_level=logging.ERROR  # Отправка событий в Sentry начиная с уровня ERROR
-    )
-
+    # Используем и FastApiIntegration и StarletteIntegration, тк они тесно связаны
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[sentry_logging],
-        traces_sample_rate=1.0,
-        profiles_sample_rate=1.0,
+        enable_tracing=True,
+        environment=os.getenv("SENTRY_ENVIRONMENT"),  # Позволяет идентифицировать конкретный инстанс если их несколько
+        integrations=[
+            StarletteIntegration(
+                transaction_style="url"  # если `endpoint` - будет отображать название самого метода
+            ),
+            FastApiIntegration(
+                transaction_style="url"  # если `endpoint` - будет отображать название самого метода
+            ),
+        ],
+        traces_sample_rate=float(os.getenv("TRACES_SAMPLE_RATE", 0.01)),
+        profiles_sample_rate=float(os.getenv("PROFILES_SAMPLE_RATE", 0.01)),
+        attach_stacktrace=True,  # прикрепляет стек вызовов к логам для ошибок, не являющихся исключениями
+        send_default_pii=True,  # данные, позволяющие идентифицировать запись
     )
 
 # В логгере настраивается логгирование gunicorn-сервера.
