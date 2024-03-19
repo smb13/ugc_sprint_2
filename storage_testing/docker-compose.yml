@@ -1,0 +1,62 @@
+---
+version : '3.9'
+
+
+services:
+  client:
+    build:
+      context: client
+      dockerfile: ./Dockerfile
+    restart: always
+    depends_on:
+    -   postgres
+    -   mongos1
+    env_file:
+    -   .env
+
+  postgres:
+    restart: always
+    image: postgres:13-alpine
+    volumes:
+    -   postgres_data:/var/lib/postgresql/data
+    -   ./wait-for-postgres.sh:/etc/wait-for-postgres.sh
+    env_file:
+    -   .env
+    ports:
+    -   5434:5432
+
+  mongocfg1:
+    container_name: mongocfg1
+    image: mongo
+    command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
+    volumes:
+    -   /etc/localtime:/etc/localtime:ro
+    -   mongo_cfg:/data/db
+
+  mongors1n1:
+    container_name: mongors1n1
+    image: mongo
+    command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
+    volumes:
+    -   /etc/localtime:/etc/localtime:ro
+    -   mongo_data:/data/db
+
+  mongos1:
+    container_name: mongos1
+    image: mongo
+    depends_on:
+    -   mongocfg1
+    -   mongors1n1
+    command: mongos --configdb mongors1conf/mongocfg1:27017 --port 27017 --bind_ip_all
+    ports:
+    -   27017:27017
+    expose:
+    -   '27017'
+    volumes:
+    -   /etc/localtime:/etc/localtime:ro
+
+
+volumes :
+  postgres_data:
+  mongo_cfg:
+  mongo_data:
