@@ -42,7 +42,7 @@ class BookmarksService(BaseService):
             {"$project": {"bookmarks": 1, "total": {"$arrayElemAt": ['$total.total', 0]}}}
         ]))).next()
 
-        return BookmarksListResponse(total=bookmarks['total'], bookmarks=[
+        return BookmarksListResponse(total=bookmarks.get('total', 0), bookmarks=[
             bookmark['movie_id'] for bookmark in bookmarks['bookmarks']
         ])
 

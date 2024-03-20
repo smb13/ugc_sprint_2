@@ -55,7 +55,7 @@ async def get_review(
 @router.post(
     path="/{movie_id}/{review_id}/like",
     summary="Добавление лайка к рецензии на фильм",
-    status_code=HTTPStatus.CREATED,
+    status_code=HTTPStatus.OK,
     dependencies=[Depends(HTTPBearer())]
 )
 async def like_review(

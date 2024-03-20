@@ -47,7 +47,7 @@ class RatingsService(BaseService):
                     "rating": {
                         "$sum": {
                             "$cond": [{"$eq": ["$user_id", (await self.jwt.get_raw_jwt())['sub']]}, "$rating", 0]}}}}
-            ]))  # Тут возможен только один элемент в ответе.
+            ]).next())  # Тут возможен только один элемент в ответе.
         except StopAsyncIteration:
             return RatingsResponse(average=0)
 

@@ -22,11 +22,55 @@ async def session():
         yield session
 
 
+def service_url(service: str = 'external'):
+    if service == 'external':
+        return test_settings.service_url
+    else:
+        return test_settings.ratings_url
+
+
 @pytest_asyncio.fixture
 def make_get_request(session):
-    async def inner(path: str, params: dict | None = None, expected_status: HTTPStatus = HTTPStatus.OK):
-        url = test_settings.service_url + path
+    async def inner(
+            path: str, params: dict | None = None, expected_status: HTTPStatus = HTTPStatus.OK,
+            service: str = 'external'
+    ):
+        url = service_url(service) + path
         async with session.get(url, params=params) as response:
+            body = await response.json()
+            status = response.status
+        if status != expected_status:
+            raise ValueError(f"Expected response status {expected_status}, got {status}: {body}")
+        return body
+
+    return inner
+
+
+@pytest_asyncio.fixture
+def make_post_request(session):
+    async def inner(
+            path: str, params: dict | None = None, expected_status: HTTPStatus = HTTPStatus.OK,
+            service: str = 'external'
+    ):
+        url = service_url(service) + path
+        async with session.post(url, json=params) as response:
+            body = await response.json()
+            status = response.status
+        if status != expected_status:
+            raise ValueError(f"Expected response status {expected_status}, got {status}: {body}")
+        return body
+
+    return inner
+
+
+@pytest_asyncio.fixture
+def make_delete_request(session):
+    async def inner(
+            path: str, params: dict | None = None, expected_status: HTTPStatus = HTTPStatus.OK,
+            service: str = 'external'
+    ):
+        url = service_url(service) + path
+        async with session.delete(url, params=params) as response:
             body = await response.json()
             status = response.status
         if status != expected_status:

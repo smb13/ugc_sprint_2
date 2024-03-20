@@ -22,3 +22,11 @@ def redis_get(redis):
         return loads(data) if data else None
 
     return inner
+
+
+@pytest_asyncio.fixture(scope="session")
+def redis_flush(redis):
+    async def inner():
+        await redis.flushall()
+
+    return inner
