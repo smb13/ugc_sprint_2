@@ -1,5 +1,7 @@
-from pymongo import MongoClient
-mongo: MongoClient | None = None
+import motor.motor_asyncio
+from motor.core import AgnosticClient
+
+mongo: AgnosticClient | None = None
 
 
 def connect(dsn):
@@ -7,10 +9,10 @@ def connect(dsn):
     if mongo:
         mongo.close()
 
-    mongo = MongoClient(dsn)
+    mongo = motor.motor_asyncio.AsyncIOMotorClient(dsn)
 
     return mongo
 
 
-async def get_mongo() -> MongoClient:
+async def get_mongo() -> AgnosticClient:
     return mongo
