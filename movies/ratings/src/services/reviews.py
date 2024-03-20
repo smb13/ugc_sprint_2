@@ -78,7 +78,7 @@ class ReviewsService(BaseService):
     async def __get_review_list(self, match_stage=None, sort_stage=None, skip=None, limit=None) -> ReviewListResponse:
         return ReviewListResponse(**self.db_review().aggregate(list(filter(None, [
             match_stage,
-            {"$lookup": {
+            {"$lookup": {  # type: ignore
                 "from": settings.mongo_review_rating_collection,
                 "localField": "_id",
                 "foreignField": "review_id",
@@ -90,14 +90,14 @@ class ReviewsService(BaseService):
                         "dislikes": {"$sum": {"$cond": [{"$eq": ["$rating", 1]}, 1, 0]}},
                         "average": {"$avg": "$rating"}}}, {
                     "$project": {"_id": 0}}]}},
-            {"$project": {
+            {"$project": {  # type: ignore
                 "_id": 0,
                 "review_id": {"$toString": "$_id"},
                 "movie_id": 1,
                 "user_id": 1,
                 "review": 1,
                 "ratings": {"$arrayElemAt": ['$review_data', 0]}}},
-            {"$project": {
+            {"$project": {  # type: ignore
                 "review_id": 1,
                 "movie_id": 1,
                 "user_id": 1,
@@ -106,12 +106,12 @@ class ReviewsService(BaseService):
                 "dislikes": "$ratings.dislikes",
                 "average": "$ratings.average"}},
             sort_stage,
-            {"$facet": {
+            {"$facet": {  # type: ignore
                 "reviews": [{
                     "$skip": skip or 0}, {
                     "$limit": limit or settings.page_size_max}],
                 "total": [{"$count": "total"}]}},
-            {"$project": {"reviews": 1, "total": {"$arrayElemAt": ['$total.total', 0]}}}
+            {"$project": {"reviews": 1, "total": {"$arrayElemAt": ['$total.total', 0]}}}  # type: ignore
         ]))).try_next())
 
 

@@ -3,7 +3,6 @@ from collections.abc import Generator
 from typing import TypeVar, List, Tuple, Dict, Any
 
 import backoff
-from pydantic import BaseModel
 from store import models
 from store.clickhouse.accessor import ClickhouseAccessor
 
