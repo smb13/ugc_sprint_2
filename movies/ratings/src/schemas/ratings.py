@@ -21,7 +21,7 @@ class RatingsResponse(BaseModel):
         0,
         description="Средняя пользовательская оценка фильма",
         example=2.3,
-    ),
+    )
     """Оценка фильма текущим пользователем"""
     rating: int | None = Field(
         None,
