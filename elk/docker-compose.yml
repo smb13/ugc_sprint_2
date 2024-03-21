@@ -5,7 +5,7 @@ x-base-settings: &base-settings
   restart: on-failure
 
 services:
-  elasticsearch:
+  elasticsearch-logs:
     image: elasticsearch:8.12.2
     <<: *base-settings
     environment:
@@ -36,27 +36,30 @@ services:
       - ./deploy/logstash/pipeline:/usr/share/logstash/pipeline
     command: logstash -f /usr/share/logstash/config/logstash.conf
     depends_on:
-      - elasticsearch
+      - elasticsearch-logs
 
-  kibana:
+  kibana-logs:
     image: kibana:8.12.2
     <<: *base-settings
     ports:
       - "5601:5601"
     depends_on:
-      elasticsearch:
+      elasticsearch-logs:
         condition: service_healthy
 
+  filebeat-service-api:
+    image: elastic/filebeat:8.12.0
+    build:
+      context: ./deploy/filebeat
+    volumes:
+      - filebeat_logs:/var/log/filebeat
+    depends_on:
+      - kibana-logs
+      - elasticsearch-logs
+      - logstash
 
-#  filebeat-<name_service>:
-#    image: elastic/filebeat:8.12.0
-#    volumes:
-#      - filebeat_logs:/var/log/filebeat/:ro
-#      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
-#    depends_on:
-#      - <name_service>
-#      - logstash
 
 # Данный volume также прописать в приложении где планируется собирать логи в файле
+# /opt/log - путь куда складывать логи в самом приложении
 #    volumes:
-#      - filebeat_logs:/var/log/filebeat/:ro
+#      - filebeat_logs:/opt/log
