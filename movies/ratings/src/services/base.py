@@ -1,4 +1,5 @@
 from async_fastapi_jwt_auth import AuthJWT
+from motor.core import AgnosticClient
 from pymongo import MongoClient
 
 from core.config import settings
@@ -9,7 +10,7 @@ class BaseService:
     Базовый класс для работы с бизнес-логикой
     """
 
-    def __init__(self, jwt: AuthJWT, mongo: MongoClient) -> None:
+    def __init__(self, jwt: AuthJWT, mongo: AgnosticClient) -> None:
         self.jwt = jwt
         self.mongo = mongo
 
