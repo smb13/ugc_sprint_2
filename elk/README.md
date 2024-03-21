@@ -24,15 +24,19 @@
 Для этого нужно добавить 
 
 ```yaml
-  filebeat-<name_service>:
+  filebeat-service-api:
     image: elastic/filebeat:8.12.0
+    build:
+      context: ./deploy/filebeat
     volumes:
-      - filebeat_logs:/var/log/filebeat/:ro
-      - ./deploy/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - filebeat_logs:/var/log/filebeat
     depends_on:
-      - <name_service>
+      - kibana-logs
+      - elasticsearch-logs
       - logstash
-
+...
+volumes:
+  filebeat_logs:
 ```
 
 В настройке сервиса в докере не забудьте так же добавить volume к сервису для хранения логов
@@ -40,32 +44,45 @@
 ```yml
 ...
 # Данный volume также прописать в приложении где планируется собирать логи в файле
-volumes:
-  - filebeat_logs:/var/log/filebeat/:ro
+# /opt/log - путь куда складывать логи в самом приложении
+    volumes:
+      - filebeat_logs:/opt/log
 ...
 ```
 
 И задать настройки в файле `filebeat.yml`
 
 ```yml
+name: "apps-service-filebeat"
+logging.metrics.enabled: false
+xpack.security.enabled: false
+xpack.monitoring.enabled: false
+setup.ilm.enabled: false
+setup.template.enabled: false
+
 filebeat.inputs:
-- type: filestream
-  enabled: true
-  paths:
-    - /var/log/filebeat/*.json
-  multiline.pattern: "^\["
-  multiline.negate: true
-  multiline.match: after
-#  fields:
-#    service_name: # укажите тут service_name если нужно
-  tags: [ "apps" ]
-  json:
-    keys_under_root: true
-    add_error_key: true
+  - type: filestream
+    scan_frequency: 1s
+    enabled: true
+    paths:
+      - /var/log/filebeat/*
+    tags: [ "apps" ]
+    json:
+      keys_under_root: true
+      add_error_key: true
+
+    processors:
+      - decode_json_fields:
+          fields: [ "message" ]
+          process_array: false
+          max_depth: 2
+          target: ""
+          overwrite_keys: true
+          add_error_key: false
 
 output.logstash:
   enabled: true
-  hosts: ["logstash:5045"]
+  hosts: [ "logstash:5044" ]
 ```
 
 В поле `tags` укажите нужный тег для приложения
