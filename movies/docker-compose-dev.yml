@@ -152,7 +152,7 @@ services:
       - mongo_db:/data/db
     ports:
       - "27017:27017"
-    profiles: [ ratings_dev, tests ]
+    profiles: [ ratings_dev, tests, notification_dev ]
 
 
 
