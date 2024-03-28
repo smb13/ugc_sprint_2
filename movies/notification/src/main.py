@@ -30,12 +30,6 @@ async def lifespan(_: FastAPI) -> AsyncGenerator:
     yield
     mongo.mongo.close()
 
-#
-# @AuthJWT.load_config
-# def get_config() -> object:
-#     return settings
-#
-
 app = FastAPI(
     title="API для сервиса нотификаций",
     version="1.0.0",
@@ -46,11 +40,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-configure_tracer()
-FastAPIInstrumentor.instrument_app(app)
-
-app.include_router(all_v1_routers)
-
 
 @app.middleware("http")
 async def before_request(request: Request, call_next: Callable) -> Response:
@@ -58,6 +47,9 @@ async def before_request(request: Request, call_next: Callable) -> Response:
         return ORJSONResponse(status_code=HTTPStatus.BAD_REQUEST, content={"detail": "X-Request-Id header is required"})
     return await call_next(request)
 
+app.include_router(all_v1_routers)
+configure_tracer()
+FastAPIInstrumentor.instrument_app(app)
 
 if __name__ == "__main__":
     uvicorn.run(
