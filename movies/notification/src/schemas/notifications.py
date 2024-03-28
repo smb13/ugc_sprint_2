@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 class EmailNotification(BaseModel):
     """Уведомление по электронной почте"""
 
+    id: UUID = Field(default=..., description="Идентификатор уведомления", examples=[uuid.uuid4()])
     subject: str = Field(default=..., description="Заголовок письма", examples=["Очень важная нотификация"])
     to: str | list[str] = Field(..., description="Реципиент или список реципиентов",
                                 examples=[["test@test.com", "vasya@test.com"], "test@test.com"])
@@ -21,3 +22,9 @@ class PushNotification(BaseModel):
     to: str | list[str] = Field(..., description="Идентификатор клиента или список иденитификаторов клиентов",
                                 examples=[["test@test.com", "vasya@test.com"], "test@test.com"])
     body: str = Field(..., description="Текст уведомления")
+
+
+class PushNotificationState(PushNotification):
+    """Push уведомление"""
+
+    read: bool = Field(default=..., description="Признак прочитанного уведомления", examples=[True, False])

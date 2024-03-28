@@ -1,7 +1,7 @@
 import uuid
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from schemas.notifications import EmailNotification, PushNotification
 

@@ -2,10 +2,8 @@ import uuid
 from http import HTTPStatus
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Path, Query, Body
-from fastapi.security import HTTPBearer
+from fastapi import APIRouter, Body
 
-from core.config import settings
 from schemas.notifications import EmailNotification, PushNotification
 
 router = APIRouter(redirect_slashes=False)

@@ -19,7 +19,10 @@ class Settings(BaseSettings):
     # Настройки Mongo: mongodb+srv://user:pass@cluster.mongodb.net/myFirstDatabase
     mongo_dsn: str = "mongodb://localhost"
     mongo_db: str = "movies"
-    mongo_tasks_collection: str = "tasks"
+    mongo_emails_collection: str = "emails"
+    mongo_pushs_collection: str = "pushs"
+
+    push_limit: int = 100
 
     jaeger_agent_port: int = 6831
     jaeger_agent_host: str = "jaeger"

@@ -2,11 +2,10 @@ import uuid
 from http import HTTPStatus
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Path, Query, Body
-from fastapi.security import HTTPBearer
+from fastapi import APIRouter, Depends, Path, Body
 
-from core.config import settings
-from schemas.notifications import EmailNotification, PushNotification
+from schemas.notifications import EmailNotification, PushNotification, PushNotificationState
+from services.notifications import get_notifications_service, NotificationsService
 
 router = APIRouter(redirect_slashes=False)
 
@@ -17,10 +16,11 @@ router = APIRouter(redirect_slashes=False)
     status_code=HTTPStatus.CREATED,
 )
 async def send(
-    request: EmailNotification = Body(...)
+    request: EmailNotification = Body(...),
+    notifications_service: NotificationsService = Depends(get_notifications_service),
 ) -> None:
-    # await bookmarks_service.add(movie_id)
-    pass
+    await notifications_service.send_email(request)
+
 
 @router.post(
     path="/push",
@@ -28,10 +28,10 @@ async def send(
     status_code=HTTPStatus.CREATED,
 )
 async def send(
-    request: PushNotification = Body(...)
+    request: PushNotification = Body(...),
+    notifications_service: NotificationsService = Depends(get_notifications_service),
 ) -> None:
-    # await bookmarks_service.add(movie_id)
-    pass
+    await notifications_service.send_push(request)
 
 
 @router.post(
@@ -39,16 +39,20 @@ async def send(
     summary="Отметка уведомления как прочитанного",
     status_code=HTTPStatus.CREATED,
 )
-async def read() -> list[PushNotification]:
-    # await bookmarks_service.add(movie_id)
-    pass
+async def read(
+    notification_id: UUID = Path(..., description="Идентификатор уведомления", example=uuid.uuid4()),
+    notifications_service: NotificationsService = Depends(get_notifications_service),
+) -> None:
+    await notifications_service.mark_as_read(notification_id)
 
 
 @router.get(
     path="/push/{user_id}",
     summary="Получение списка доставленных push уведомлений",
-    status_code=HTTPStatus.CREATED,
+    status_code=HTTPStatus.OK,
 )
-async def history() -> list[PushNotification]:
-    # await bookmarks_service.add(movie_id)
-    pass
+async def history(
+    user_id: str = Path(..., description="Идентификатор пользователя", example="test@test.com"),
+    notifications_service: NotificationsService = Depends(get_notifications_service),
+) -> list[PushNotificationState]:
+    return await notifications_service.list(user_id)

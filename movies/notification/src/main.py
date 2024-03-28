@@ -18,12 +18,12 @@ from db import mongo
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncGenerator:
     mongo.connect(settings.mongo_dsn)
-    # mongo.mongo[settings.mongo_db][settings.mongo_rating_collection].create_index(
-    #     ['movie_id', 'user_id'], unique=True, background=True
-    # )
-    # mongo.mongo[settings.mongo_db][settings.mongo_review_collection].create_index(
-    #     ['movie_id', 'user_id'], unique=True, background=True
-    # )
+    await mongo.mongo[settings.mongo_db][settings.mongo_emails_collection].create_index(
+        ['id'], unique=True, background=True
+    )
+    await mongo.mongo[settings.mongo_db][settings.mongo_pushs_collection].create_index(
+        ['id'], unique=True, background=True
+    )
     # mongo.mongo[settings.mongo_db][settings.mongo_bookmarks_collection].create_index(
     #     ['user_id', 'movie_id'], unique=True, background=True
     # )
