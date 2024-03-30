@@ -64,6 +64,7 @@ class NotificationsService(BaseService):
                 await self.db().find(
                     {
                         "to": user_id,
+                        "type": "push",
                         "delivered_at": {
                             '$gt': datetime.datetime.utcnow() - datetime.timedelta(seconds=settings.show_timeout)}},
                     projection={"to": False}
