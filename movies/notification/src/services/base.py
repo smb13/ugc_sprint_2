@@ -13,8 +13,11 @@ class BaseService:
         self.jwt = jwt
         self.mongo = mongo
 
+    def db(self):
+        return self.mongo[settings.mongo_db]
+
     def db_pushs(self):
-        return self.mongo[settings.mongo_db][settings.mongo_pushs_collection]
+        return self.db()[settings.mongo_pushs_collection]
 
     def db_emails(self):
-        return self.mongo[settings.mongo_db][settings.mongo_emails_collection]
+        return self.db()[settings.mongo_emails_collection]

@@ -30,6 +30,8 @@ class Settings(BaseSettings):
     page_size: int = 50
     page_size_max: int = 100
 
+    send_timeout: int = 60
+
 
 # Корень проекта
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
