@@ -19,14 +19,13 @@ class NotificationsService(BaseService):
     Класс для реализации логики работы с закладками.
     """
 
-    async def send_email(self, request: EmailNotification):
+    async def send_email_notification(self, request: EmailNotification):
         try:
             await self.db_emails().insert_one({
                 "id": bson.Binary.from_uuid(request.id),
                 "subject": request.subject,
                 "to": request.to,
                 "body": request.body,
-                "delivered": False,
                 "ts": datetime.datetime.utcnow()
             })
         except DuplicateKeyError:
@@ -34,14 +33,13 @@ class NotificationsService(BaseService):
                 status_code=HTTPStatus.CONFLICT, detail="Уведомление с таким идентификатором уже существует"
             )
 
-    async def send_push(self, request):
+    async def send_push_notification(self, request):
         try:
             await self.db_pushs().insert_one({
                 "id": bson.Binary.from_uuid(request.id),
                 "subject": request.subject,
                 "to": request.to,
                 "body": request.body,
-                "delivered": False,
                 "read": False,
                 "ts": datetime.datetime.utcnow()
             })
@@ -50,12 +48,12 @@ class NotificationsService(BaseService):
                 status_code=HTTPStatus.CONFLICT, detail="Уведомление с таким идентификатором уже существует"
             )
 
-    async def mark_as_read(self, notification_id):
+    async def mark_notification_as_read(self, notification_id):
         await self.db_pushs().update_one({
             'id': bson.Binary.from_uuid(notification_id)
         }, {'$set': {'read': True}}, upsert=True)
 
-    async def list(self, user_id) -> list[PushNotificationState]:
+    async def get_notifications_history(self, user_id) -> list[PushNotificationState]:
         return [PushNotificationState(**x, to=user_id) for x in
                 await self.db_pushs().find(
                     {"to": user_id, "delivered": True}, projection={"to": False}

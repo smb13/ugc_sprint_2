@@ -19,8 +19,8 @@ class PushNotification(BaseModel):
 
     id: UUID = Field(default=..., description="Идентификатор уведомления", examples=[uuid.uuid4()])
     subject: str = Field(default=..., description="Заголовок уведомления", examples=["Очень важная нотификация"])
-    to: str | list[str] = Field(..., description="Идентификатор клиента или список иденитификаторов клиентов",
-                                examples=[["test@test.com", "vasya@test.com"], "test@test.com"])
+    to: str = Field(..., description="Идентификатор клиента или список иденитификаторов клиентов",
+                                examples=["test@test.com"])
     body: str = Field(..., description="Текст уведомления")
 
 
