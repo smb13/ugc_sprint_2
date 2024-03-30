@@ -8,6 +8,7 @@ from fastapi import Depends, HTTPException
 from motor.core import AgnosticClient
 from pymongo.errors import DuplicateKeyError
 
+from core.config import settings
 from db.mongo import get_mongo
 from schemas.notifications import EmailNotification, PushNotificationState, PushNotification
 from services.base import BaseService
@@ -56,10 +57,13 @@ class NotificationsService(BaseService):
 
     async def get_notifications_history(self, user_id) -> list[PushNotificationState]:
         return [PushNotificationState(**x, to=user_id) for x in
-                await self.db_pushs().find(
-                    {"to": user_id, "delivered": True}, projection={"to": False}
+                await self.db().find(
+                    {
+                        "to": user_id,
+                        "delivered_at": {
+                            '$gt': datetime.datetime.utcnow() - datetime.timedelta(seconds=settings.show_timeout)}},
+                    projection={"to": False}
                 ).to_list(settings.push_limit)]
-        return []
 
 
 @lru_cache
