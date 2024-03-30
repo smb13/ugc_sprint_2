@@ -23,10 +23,12 @@ class NotificationsService(BaseService):
         try:
             await self.db().insert_one({
                 "id": bson.Binary.from_uuid(request.id),
-                "type:": "email",
+                "type": "email",
                 "subject": request.subject,
                 "to": request.to,
                 "body": request.body,
+                "updated_at": None,
+                "delivered_at": None,
                 "ts": datetime.datetime.utcnow()
             })
         except DuplicateKeyError:
@@ -43,6 +45,8 @@ class NotificationsService(BaseService):
                 "to": request.to,
                 "body": request.body,
                 "read": False,
+                "updated_at": None,
+                "delivered_at": None,
                 "ts": datetime.datetime.utcnow()
             })
         except DuplicateKeyError:

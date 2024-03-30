@@ -45,7 +45,8 @@ class TasksService(BaseService):
                     {'updated_at': None},
                     {'updated_at': {
                         '$lt': datetime.datetime.utcnow() - datetime.timedelta(seconds=settings.send_timeout)}}],
-                'delivered_at': None},
+                'delivered_at': None
+            },
             {'$set': {'updated_at': datetime.datetime.utcnow(), 'mark': str(mark)}}
         )
         if a.modified_count == 0:
