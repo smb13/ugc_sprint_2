@@ -14,10 +14,4 @@ class BaseService:
         self.mongo = mongo
 
     def db(self):
-        return self.mongo[settings.mongo_db]
-
-    def db_pushs(self):
-        return self.db()[settings.mongo_pushs_collection]
-
-    def db_emails(self):
-        return self.db()[settings.mongo_emails_collection]
+        return self.mongo[settings.mongo_db][settings.mongo_notifications_collection]

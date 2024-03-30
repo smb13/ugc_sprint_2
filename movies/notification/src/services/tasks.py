@@ -1,18 +1,15 @@
 import datetime
 import uuid
 from functools import lru_cache
-from http import HTTPStatus
-from pprint import pprint
 
 import bson
 from async_fastapi_jwt_auth import AuthJWT
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from motor.core import AgnosticClient
-from pymongo.errors import DuplicateKeyError
 
 from core.config import settings
 from db.mongo import get_mongo
-from schemas.notifications import EmailNotification, PushNotificationState, PushNotification
+from schemas.notifications import EmailNotification, PushNotification
 from services.base import BaseService
 
 
@@ -23,24 +20,27 @@ class TasksService(BaseService):
 
     async def get_push_tasks(self, clients) -> list[PushNotification]:
         mark = uuid.uuid4()
-        a = await self.db_pushs().update_many(
+        a = await self.db().update_many(
             {
+                "type": "push",
                 '$or': [
                     {'updated_at': None},
                     {'updated_at': {
                         '$lt': datetime.datetime.utcnow() - datetime.timedelta(seconds=settings.send_timeout)}}],
-                'delivered_at': None},
+                'delivered_at': None,
+                'to': {'$in': clients}},
             {'$set': {'updated_at': datetime.datetime.utcnow(), 'mark': str(mark)}}
         )
         if a.modified_count == 0:
             return []
         return [PushNotification(**task) for task in
-                await self.db_pushs().find({'mark': str(mark)}).to_list(a.modified_count)]
+                await self.db().find({'mark': str(mark)}).to_list(a.modified_count)]
 
     async def get_email_task(self) -> list[EmailNotification]:
         mark = uuid.uuid4()
-        a = await self.db_emails().update_one(
+        a = await self.db().update_one(
             {
+                'type': 'email',
                 '$or': [
                     {'updated_at': None},
                     {'updated_at': {
@@ -51,14 +51,15 @@ class TasksService(BaseService):
         if a.modified_count == 0:
             return []
         return [EmailNotification(**task) for task in
-                await self.db_emails().find({'mark': str(mark)}).to_list(a.modified_count)]
+                await self.db().find({'mark': str(mark)}).to_list(a.modified_count)]
 
     async def confirm(self, notifications) -> None:
-        await self.db_pushs().update_many(
+        await self.db().update_many(
             {'id': {'$in': [bson.Binary.from_uuid(notification_id) for notification_id in notifications]}},
             {'$set': {'delivered_at': datetime.datetime.utcnow()}},
             upsert=True
         )
+
 
 @lru_cache
 def get_tasks_service(

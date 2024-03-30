@@ -19,8 +19,7 @@ class Settings(BaseSettings):
     # Настройки Mongo: mongodb+srv://user:pass@cluster.mongodb.net/myFirstDatabase
     mongo_dsn: str = "mongodb://localhost"
     mongo_db: str = "movies"
-    mongo_emails_collection: str = "emails"
-    mongo_pushs_collection: str = "pushs"
+    mongo_notifications_collection: str = "notifications"
 
     push_limit: int = 100
 

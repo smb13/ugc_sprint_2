@@ -8,9 +8,8 @@ from fastapi import Depends, HTTPException
 from motor.core import AgnosticClient
 from pymongo.errors import DuplicateKeyError
 
-from core.config import settings
 from db.mongo import get_mongo
-from schemas.notifications import EmailNotification, PushNotificationState
+from schemas.notifications import EmailNotification, PushNotificationState, PushNotification
 from services.base import BaseService
 
 
@@ -21,8 +20,9 @@ class NotificationsService(BaseService):
 
     async def send_email_notification(self, request: EmailNotification):
         try:
-            await self.db_emails().insert_one({
+            await self.db().insert_one({
                 "id": bson.Binary.from_uuid(request.id),
+                "type:": "email",
                 "subject": request.subject,
                 "to": request.to,
                 "body": request.body,
@@ -33,10 +33,11 @@ class NotificationsService(BaseService):
                 status_code=HTTPStatus.CONFLICT, detail="Уведомление с таким идентификатором уже существует"
             )
 
-    async def send_push_notification(self, request):
+    async def send_push_notification(self, request: PushNotification):
         try:
-            await self.db_pushs().insert_one({
+            await self.db().insert_one({
                 "id": bson.Binary.from_uuid(request.id),
+                "type": "push",
                 "subject": request.subject,
                 "to": request.to,
                 "body": request.body,
@@ -49,7 +50,7 @@ class NotificationsService(BaseService):
             )
 
     async def mark_notification_as_read(self, notification_id):
-        await self.db_pushs().update_one({
+        await self.db().update_one({
             'id': bson.Binary.from_uuid(notification_id)
         }, {'$set': {'read': True}}, upsert=True)
 
@@ -58,6 +59,7 @@ class NotificationsService(BaseService):
                 await self.db_pushs().find(
                     {"to": user_id, "delivered": True}, projection={"to": False}
                 ).to_list(settings.push_limit)]
+        return []
 
 
 @lru_cache

@@ -28,7 +28,7 @@ async def get_email_task(
 )
 async def get_push_tasks(
     clients: list[str] = Query(..., description="Список доступных клиентов",
-                              example=["test@test.com", "vasya@test.com"]),
+                               example=["test@test.com", "vasya@test.com"]),
     tasks_service: TasksService = Depends(get_tasks_service)
 ) -> list[PushNotification]:
     return await tasks_service.get_push_tasks(clients)
