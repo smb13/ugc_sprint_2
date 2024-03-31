@@ -100,6 +100,23 @@ services:
     command: uvicorn main:app --host 0.0.0.0 --port 8080 --reload
     profiles: [ ratings_dev, tests ]
 
+  notification_dev: # Ratings API for development
+    extends:
+      file: docker-compose-base.yml
+      service: notification
+    build:
+      context: ./notification
+      args:
+        REQUIREMENTS_DEV: true
+    environment:
+      DEBUG: true
+    ports:
+      - "8000:8080"
+    volumes:
+      - ./notification/src:/src
+    command: uvicorn main:app --host 0.0.0.0 --port 8080 --reload
+    profiles: [ notification_dev, tests ]
+
   etl:
     extends:
       file: docker-compose-base.yml
@@ -143,7 +160,7 @@ services:
     extends:
       file: docker-compose-base.yml
       service: jaeger
-    profiles: [auth_dev, external_dev, tests]
+    profiles: [auth_dev, external_dev, tests, notification_dev]
 
   mongo:
     container_name: mongo
@@ -152,7 +169,7 @@ services:
       - mongo_db:/data/db
     ports:
       - "27017:27017"
-    profiles: [ ratings_dev, tests ]
+    profiles: [ ratings_dev, tests, notification_dev ]
 
 
 
