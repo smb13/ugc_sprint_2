@@ -1,4 +1,4 @@
-import motor.motor_asyncio
+    import motor.motor_asyncio
 from motor.core import AgnosticClient
 
 mongo: AgnosticClient | None = None

@@ -67,8 +67,7 @@ class NotificationsService(BaseService):
                         "type": "push",
                         "delivered_at": {
                             '$gt': datetime.datetime.utcnow() - datetime.timedelta(seconds=settings.show_timeout)}},
-                    projection={"to": False}
-                ).to_list(settings.push_limit)]
+                    projection={"to": False}).to_list(settings.push_limit)]
 
 
 @lru_cache
